@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 if(NOT TARGET ${RamRodConsole_LIBRARIES})
   project(RamRodConsole
-    VERSION 0.7.0
+    VERSION 0.8.0
     DESCRIPTION "Ram-Rod console printer"
     LANGUAGES CXX
   )
@@ -20,9 +20,28 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
 
   target_sources(${PROJECT_NAME}
     PRIVATE
-      include/ramrod/console/printer.h
+      include/ramrod/console.h
+      include/ramrod/console/attention.h
+      include/ramrod/console/clean.h
+      include/ramrod/console/cout.h
+      include/ramrod/console/endl.h
+      include/ramrod/console/error.h
+      include/ramrod/console/flush.h
+      include/ramrod/console/format.h
+      include/ramrod/console/regular.h
       include/ramrod/console/types.h
-      src/ramrod/console/printer.cpp
+      include/ramrod/console/warning.h
+
+      src/ramrod/console.cpp
+      src/ramrod/console/attention.cpp
+      src/ramrod/console/clean.cpp
+      src/ramrod/console/cout.cpp
+      src/ramrod/console/endl.cpp
+      src/ramrod/console/error.cpp
+      src/ramrod/console/flush.cpp
+      src/ramrod/console/format.cpp
+      src/ramrod/console/regular.cpp
+      src/ramrod/console/warning.cpp
   )
 
   target_include_directories(${PROJECT_NAME} BEFORE PRIVATE include)
