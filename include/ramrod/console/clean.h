@@ -18,8 +18,6 @@ namespace ramrod {
       }
     };
   }
-  extern console::clean clean;
 }
-namespace rr = ramrod;
 
 #endif // RAMROD_CONSOLE_CLEAN_H

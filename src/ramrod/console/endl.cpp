@@ -5,4 +5,3 @@ ramrod::console::endl &ramrod::console::endl::operator ()(){
   return *this;
 }
 
-ramrod::console::endl endl;

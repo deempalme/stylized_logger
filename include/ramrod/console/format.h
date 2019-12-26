@@ -102,8 +102,6 @@ namespace ramrod {
       std::string current_format_;
     };
   }
-
-  extern console::format format;
 }
 
 #endif // RAMROD_CONSOLE_FORMAT_H

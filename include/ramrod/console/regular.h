@@ -47,13 +47,7 @@ namespace ramrod {
     private:
       std::string message_;
     };
-
-    class format;
   }
-  extern console::regular regular;
-  extern console::format format;
 }
-
-namespace rr = ramrod;
 
 #endif // RAMROD_CONSOLE_REGULAR_H

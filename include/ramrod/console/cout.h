@@ -11,7 +11,6 @@ namespace ramrod {
       cout() = default;
     };
   }
-  extern console::cout cout;
 }
 
 namespace rr = ramrod;

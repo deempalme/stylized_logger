@@ -124,5 +124,3 @@ void ramrod::console::format::add_format(const int parameter, const std::string 
                                        "")
                     + settings;
 }
-
-ramrod::console::format format;

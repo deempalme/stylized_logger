@@ -18,8 +18,6 @@ namespace ramrod {
       }
     };
   }
-  extern console::flush flush;
 }
-namespace rr = ramrod;
 
 #endif // RAMROD_CONSOLE_FLUSH_H

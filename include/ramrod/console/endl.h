@@ -18,8 +18,6 @@ namespace ramrod {
       }
     };
   }
-  extern console::endl endl;
 }
-namespace rr = ramrod;
 
 #endif // RAMROD_CONSOLE_ENDL_H
