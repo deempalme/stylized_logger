@@ -10,5 +10,3 @@ namespace ramrod {
     }
   } // namespace: console
 } // namespace: ramrod
-
-extern ramrod::console::clean_stream clean = ramrod::console::clean_stream();

@@ -17,7 +17,9 @@ namespace ramrod {
         return output;
       }
     };
-    extern clean_stream clean;
+
+    inline clean_stream clean;
+
   } // namespace: console
 } // namespace: ramrod
 
