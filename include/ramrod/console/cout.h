@@ -5,15 +5,16 @@
 
 namespace ramrod {
   namespace console {
-    class cout : public std::ostream
+    class cout_stream : public std::ostream
     {
     public:
-      cout() = default;
+      cout_stream() = default;
     };
+
+    inline cout_stream cout;
   }
-  extern console::cout cout;
 }
 
-namespace rr = ramrod;
+namespace rr = ramrod::console;
 
 #endif // RAMROD_CONSOLE_COUT_H

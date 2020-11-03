@@ -5,21 +5,22 @@
 
 namespace ramrod {
   namespace console {
-    class clean
+    class clean_stream
     {
     public:
-      clean() = default;
+      clean_stream() = default;
 
       void operator ()(const bool force = false);
 
-      friend std::ostream &operator<<(std::ostream &output, clean &/*input*/) {
+      friend std::ostream &operator<<(std::ostream &output, clean_stream &/*input*/) {
         output << "\033[2J\033[H\033[3J";
         return output;
       }
     };
-  }
-  extern console::clean clean;
-}
-namespace rr = ramrod;
+    extern clean_stream clean;
+  } // namespace: console
+} // namespace: ramrod
+
+namespace rr = ramrod::console;
 
 #endif // RAMROD_CONSOLE_CLEAN_H

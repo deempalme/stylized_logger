@@ -1,8 +1,6 @@
 #include "ramrod/console/flush.h"
 
-ramrod::console::flush &ramrod::console::flush::operator ()(){
+ramrod::console::flush_stream &ramrod::console::flush_stream::operator ()(){
   std::flush(std::cout);
   return *this;
 }
-
-ramrod::console::flush flush;

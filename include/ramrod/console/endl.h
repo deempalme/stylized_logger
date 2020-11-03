@@ -5,21 +5,21 @@
 
 namespace ramrod {
   namespace console {
-    class endl
+    class endl_stream
     {
     public:
-      endl() = default;
+      endl_stream() = default;
 
-      endl &operator ()();
+      endl_stream &operator ()();
 
-      friend std::ostream &operator<<(std::ostream &output, endl &/*input*/) {
+      friend std::ostream &operator<<(std::ostream &output, endl_stream &/*input*/) {
         output << std::endl;
         return output;
       }
     };
+    inline endl_stream endl;
   }
-  extern console::endl endl;
 }
-namespace rr = ramrod;
+namespace rr = ramrod::console;
 
 #endif // RAMROD_CONSOLE_ENDL_H

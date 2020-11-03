@@ -16,13 +16,14 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
     CACHE INTERNAL ""
   )
 
-  add_library(${PROJECT_NAME})
+  add_library(${PROJECT_NAME} STATIC)
 
   target_sources(${PROJECT_NAME}
     PRIVATE
       include/ramrod/console.h
       include/ramrod/console/attention.h
       include/ramrod/console/clean.h
+      include/ramrod/console/colors.h
       include/ramrod/console/cout.h
       include/ramrod/console/endl.h
       include/ramrod/console/error.h
@@ -44,11 +45,11 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
       src/ramrod/console/warning.cpp
   )
 
-  target_include_directories(${PROJECT_NAME} BEFORE PRIVATE include)
+  target_include_directories(${PROJECT_NAME} BEFORE PUBLIC include)
 
   set_target_properties(${PROJECT_NAME}
     PROPERTIES
-      CXX_STANDARD          11
+      CXX_STANDARD          17
       CXX_STANDARD_REQUIRED TRUE
       CXX_EXTENSIONS        FALSE
   )
@@ -69,5 +70,5 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
       -Wignored-qualifiers
   )
 
-  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 endif(NOT TARGET ${RamRodConsole_LIBRARIES})
