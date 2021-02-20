@@ -29,6 +29,7 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
       include/ramrod/console/error.h
       include/ramrod/console/flush.h
       include/ramrod/console/format.h
+      include/ramrod/console/perror.h
       include/ramrod/console/regular.h
       include/ramrod/console/types.h
       include/ramrod/console/warning.h
@@ -41,6 +42,7 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
       src/ramrod/console/error.cpp
       src/ramrod/console/flush.cpp
       src/ramrod/console/format.cpp
+      src/ramrod/console/perror.cpp
       src/ramrod/console/regular.cpp
       src/ramrod/console/warning.cpp
   )
