@@ -5,55 +5,59 @@
 
 namespace ramrod {
   namespace console {
-    class warning
+    class endl_stream;
+
+    class warning_stream
     {
     public:
-      warning();
+      warning_stream();
 
-      warning &change_message(const std::string &new_message = " Warning: ");
+      warning_stream &change_message(const std::string &new_message = " Warning: ");
 
-      warning &operator()(const std::string &text);
-      warning &operator()(const char *text);
-      warning &operator()(const bool boolean);
-      warning &operator()(const char character);
-      warning &operator()(const unsigned char character);
-      warning &operator()(const signed char character);
-      warning &operator()(const int integer_number);
-      warning &operator()(const unsigned int unsigend_integer_number);
-      warning &operator()(const short int short_integer_number);
-      warning &operator()(const unsigned short int unsigned_short_integer_number);
-      warning &operator()(const long int long_integer_number);
-      warning &operator()(const unsigned long int unsigned_long_integer_number);
-      warning &operator()(const float float_number);
-      warning &operator()(const double double_number);
-      warning &operator()(const long double long_double_number);
+      warning_stream &operator()();
+      warning_stream &operator()(const std::string &text);
+      warning_stream &operator()(const char *text);
+      warning_stream &operator()(const bool boolean);
+      warning_stream &operator()(const char character);
+      warning_stream &operator()(const unsigned char character);
+      warning_stream &operator()(const signed char character);
+      warning_stream &operator()(const int integer_number);
+      warning_stream &operator()(const unsigned int unsigend_integer_number);
+      warning_stream &operator()(const short int short_integer_number);
+      warning_stream &operator()(const unsigned short int unsigned_short_integer_number);
+      warning_stream &operator()(const long int long_integer_number);
+      warning_stream &operator()(const unsigned long int unsigned_long_integer_number);
+      warning_stream &operator()(const float float_number);
+      warning_stream &operator()(const double double_number);
+      warning_stream &operator()(const long double long_double_number);
 
-      warning &operator<<(const std::string &text);
-      warning &operator<<(const char *text);
-      warning &operator<<(const bool boolean);
-      warning &operator<<(const char character);
-      warning &operator<<(const unsigned char character);
-      warning &operator<<(const signed char character);
-      warning &operator<<(const int integer_number);
-      warning &operator<<(const unsigned int unsigend_integer_number);
-      warning &operator<<(const short int short_integer_number);
-      warning &operator<<(const unsigned short int unsigned_short_integer_number);
-      warning &operator<<(const long int long_integer_number);
-      warning &operator<<(const unsigned long int unsigned_long_integer_number);
-      warning &operator<<(const float float_number);
-      warning &operator<<(const double double_number);
-      warning &operator<<(const long double long_double_number);
+      warning_stream &operator<<(const std::string &text);
+      warning_stream &operator<<(const char *text);
+      warning_stream &operator<<(const bool boolean);
+      warning_stream &operator<<(const char character);
+      warning_stream &operator<<(const unsigned char character);
+      warning_stream &operator<<(const signed char character);
+      warning_stream &operator<<(const int integer_number);
+      warning_stream &operator<<(const unsigned int unsigend_integer_number);
+      warning_stream &operator<<(const short int short_integer_number);
+      warning_stream &operator<<(const unsigned short int unsigned_short_integer_number);
+      warning_stream &operator<<(const long int long_integer_number);
+      warning_stream &operator<<(const unsigned long int unsigned_long_integer_number);
+      warning_stream &operator<<(const float float_number);
+      warning_stream &operator<<(const double double_number);
+      warning_stream &operator<<(const long double long_double_number);
+
+      warning_stream &operator<<(const endl_stream &/*endls*/);
 
     private:
       std::string message_;
+      std::string format_;
     };
 
-    class format;
+    inline warning_stream warning;
   }
-  extern console::warning warning;
-  extern console::format format;
 }
 
-namespace rr = ramrod;
+namespace rr = ramrod::console;
 
 #endif // RAMROD_CONSOLE_WARNING_H

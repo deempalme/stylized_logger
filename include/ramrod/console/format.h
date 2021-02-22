@@ -8,10 +8,10 @@
 
 namespace ramrod {
   namespace console {
-    class format
+    class format_stream
     {
     public:
-      format();
+      format_stream();
 
       /*
        * ### Sets quick ANSI parameters
@@ -23,7 +23,7 @@ namespace ramrod {
        * {const int} parameter = ANSI parameter's number
        *
        */
-      format &add_style(const int parameter);
+      format_stream &add_style(const int parameter);
       /*
        * ### Colorize the text using predefined colors
        *
@@ -35,10 +35,10 @@ namespace ramrod {
        *   - message: green
        *
        * @parameters
-       * {const ramrod::message::type} color = predefined color
+       * {const message::type} color = predefined color
        *
        */
-      format &colorize(const ramrod::message::type type);
+      format_stream &colorize(const message::type type);
       /*
        * ### Colorize the text or background using 8-bit colors
        *
@@ -50,7 +50,7 @@ namespace ramrod {
        * {const int} usage = Foreground or Background
        *
        */
-      format &colorize(const int color, const int usage = ramrod::console::style::foreground);
+      format_stream &colorize(const int color, const int usage = ramrod::console::style::foreground);
       /*
        * ### Colorize the text or background using 24-bit colors
        *
@@ -62,7 +62,7 @@ namespace ramrod {
        * {const int} usage = Foreground or Background
        *
        */
-      format &colorize(const int red, const int green, const int blue,
+      format_stream &colorize(const int red, const int green, const int blue,
                     const int usage = ramrod::console::style::foreground);
 
       /*
@@ -76,11 +76,11 @@ namespace ramrod {
        *   - message: green
        *
        * @parameters
-       * {const ramrod::message::type} color = predefined color
+       * {const message::type} color = predefined color
        * {const bool} restart = `true` to restart format saved in `current();`
        *
        */
-      format &force_color(const ramrod::message::type type, const bool restart = false);
+      format_stream &force_color(const message::type type, const bool restart = false);
 
       const std::string &current();
       /*
@@ -89,9 +89,9 @@ namespace ramrod {
        * Deletes all previous text formats and sets all defaults
        *
        */
-      format &reset();
+      format_stream &reset();
 
-      friend std::ostream &operator<<(std::ostream &output, format &input) {
+      friend std::ostream &operator<<(std::ostream &output, format_stream &input) {
         output << input.current();
         return output;
       }
@@ -101,9 +101,11 @@ namespace ramrod {
 
       std::string current_format_;
     };
-  }
 
-  extern console::format format;
+    inline format_stream format;
+  }
 }
+
+namespace rr = ramrod::console;
 
 #endif // RAMROD_CONSOLE_FORMAT_H

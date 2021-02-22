@@ -5,21 +5,21 @@
 
 namespace ramrod {
   namespace console {
-    class flush
+    class flush_stream
     {
     public:
-      flush() = default;
+      flush_stream() = default;
 
-      flush &operator ()();
+      flush_stream &operator ()();
 
-      friend std::ostream &operator<<(std::ostream &output, flush &/*input*/) {
+      friend std::ostream &operator<<(std::ostream &output, flush_stream &/*input*/) {
         output << std::flush;
         return output;
       }
     };
+    inline flush_stream flush;
   }
-  extern console::flush flush;
 }
-namespace rr = ramrod;
+namespace rr = ramrod::console;
 
 #endif // RAMROD_CONSOLE_FLUSH_H

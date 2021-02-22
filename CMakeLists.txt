@@ -16,18 +16,20 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
     CACHE INTERNAL ""
   )
 
-  add_library(${PROJECT_NAME})
+  add_library(${PROJECT_NAME} STATIC)
 
   target_sources(${PROJECT_NAME}
     PRIVATE
       include/ramrod/console.h
       include/ramrod/console/attention.h
       include/ramrod/console/clean.h
+      include/ramrod/console/colors.h
       include/ramrod/console/cout.h
       include/ramrod/console/endl.h
       include/ramrod/console/error.h
       include/ramrod/console/flush.h
       include/ramrod/console/format.h
+      include/ramrod/console/perror.h
       include/ramrod/console/regular.h
       include/ramrod/console/types.h
       include/ramrod/console/warning.h
@@ -40,34 +42,20 @@ if(NOT TARGET ${RamRodConsole_LIBRARIES})
       src/ramrod/console/error.cpp
       src/ramrod/console/flush.cpp
       src/ramrod/console/format.cpp
+      src/ramrod/console/perror.cpp
       src/ramrod/console/regular.cpp
       src/ramrod/console/warning.cpp
   )
 
-  target_include_directories(${PROJECT_NAME} BEFORE PRIVATE include)
+  target_include_directories(${PROJECT_NAME} BEFORE PUBLIC include)
 
   set_target_properties(${PROJECT_NAME}
     PROPERTIES
-      CXX_STANDARD          11
+      CXX_STANDARD          17
       CXX_STANDARD_REQUIRED TRUE
       CXX_EXTENSIONS        FALSE
   )
 
-  target_compile_options(${PROJECT_NAME}
-    PRIVATE
-      -Wall
-      -Wextra
-      -Wundef
-      -pedantic
-      -Wconversion
-      -Wcast-align
-      -Wfloat-equal
-      -Wpointer-arith
-      -Wsign-conversion
-      -Wunreachable-code
-      -Wunused-function
-      -Wignored-qualifiers
-  )
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 endif(NOT TARGET ${RamRodConsole_LIBRARIES})
