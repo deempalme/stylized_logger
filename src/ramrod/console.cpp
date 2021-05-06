@@ -11,7 +11,7 @@ namespace ramrod {
       va_start(arg, type);
       const int result{std::vprintf(format, arg)};
       va_end(arg);
-      console::format.force_color(message::type::message, true);
+      console::format.force_color(message::type::regular, true);
       std::flush(std::cout);
 
       return result;
@@ -34,7 +34,7 @@ namespace ramrod {
       va_start(arg, type);
       const int result{std::vprintf(format, arg)};
       va_end(arg);
-      console::format.force_color(message::type::message, true);
+      console::format.force_color(message::type::regular, true);
       std::flush(std::cout);
 
       return result;

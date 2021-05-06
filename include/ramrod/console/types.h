@@ -51,11 +51,11 @@ namespace ramrod {
       enum type : unsigned int {
         attention = 0u,
         error     = 1u,
-        message   = 2u,
+        regular   = 2u,
         warning   = 3u
       };
-    } // namespace message
-  } // namespace console
-} // namespace ramrod
+    } // namespace: message
+  } // namespace: console
+} // namespace: ramrod
 
 #endif // RAMROD_CONSOLE_PRINTER_TYPES_H
