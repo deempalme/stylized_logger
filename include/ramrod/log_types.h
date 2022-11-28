@@ -1,8 +1,10 @@
-#ifndef RAMROD_CONSOLE_PRINTER_TYPES_H
-#define RAMROD_CONSOLE_PRINTER_TYPES_H
+#ifndef RAMROD_LOG_TYPES_H
+#define RAMROD_LOG_TYPES_H
 
 namespace ramrod {
-  namespace console {
+  class log_types
+  {
+  public:
     enum code : int {
       black          = 0,
       red            = 1,
@@ -47,15 +49,20 @@ namespace ramrod {
       overline_off    = 55
     };
 
-    namespace message {
-      enum type : unsigned int {
-        attention = 0u,
-        error     = 1u,
-        message   = 2u,
-        warning   = 3u
-      };
-    } // namespace: message
-  } // namespace: console
-} // namespace: ramrod
+    enum type : unsigned int {
+      attention = 0u,
+      error     = 1u,
+      good      = 2u,
+      warning   = 3u
+    };
 
-#endif // RAMROD_CONSOLE_PRINTER_TYPES_H
+    enum level : unsigned int {
+      ignore          = 0u,
+      print           = 1u,
+      store           = 2u,
+      print_and_store = 3u
+    };
+  };
+} // namespace ramrod
+
+#endif // RAMROD_LOG_TYPES_H
