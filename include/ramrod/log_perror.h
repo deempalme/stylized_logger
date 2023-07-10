@@ -143,6 +143,7 @@ namespace ramrod {
      *
      * @return Reference to current object
      */
+    perror_stream &operator()(const long double double_number);
   };
 
   inline static perror_stream log_perror;

@@ -194,7 +194,7 @@ namespace ramrod {
     va_end(args1);
     std::vsnprintf(buffer.data(), buffer.size(), format, args2);
     va_end(args2);
-    start() << buffer.data() << ramrod::log_format;
+    start_header() << buffer.data() << ramrod::log_format;
     return buffer.size();
   }
 
