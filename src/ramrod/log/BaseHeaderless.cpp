@@ -10,7 +10,6 @@ namespace
     /// @brief
     static constexpr char DEBUG_FORMAT[]{""};
     /// @brief
-    static constexpr char ERROR_FORMAT[]{""};
     /// @brief
     static constexpr char INFO_FORMAT[]{""};
     /// @brief String used when no format is necessary
@@ -33,12 +32,6 @@ namespace
         case ramrod::BaseHeaderless::Level::DEBUG:
             static constexpr char DEBUG_STRING[]{"[DEBUG]"};
             return DEBUG_STRING;
-        case ramrod::BaseHeaderless::Level::WARNING:
-            static constexpr char WARNING_STRING[]{"[WARNING]"};
-            return WARNING_STRING;
-        case ramrod::BaseHeaderless::Level::ERROR:
-            static constexpr char ERROR_STRING[]{"[ERROR]"};
-            return ERROR_STRING;
         default:
             static constexpr char VERBOSE_STRING[]{"[VERBOSE]"};
             return VERBOSE_STRING;
@@ -48,28 +41,6 @@ namespace
 
 namespace ramrod
 {
-    BaseHeaderless &BaseHeaderless::header()
-    {
-        // Adding date and time
-        const std::time_t t{std::time(nullptr)};
-        output_ << style_ << std::put_time(std::localtime(&t), "[%Y-%m-%d %H:%M:%S]")
-                << level_string(level_) << CLEAR_FORMAT;
-        return *this;
-    }
-
-    BaseHeaderless &BaseHeaderless::header(const char *filepath, const int line)
-    {
-        /// @brief Character that should be placed after file and line strings
-        static constexpr char FILE_BEGIN[]{"["};
-        /// @brief Character that should be placed after file and line strings
-        static constexpr char FILE_END[]{"]"};
-        /// @brief Separator character for filepath and line
-        static constexpr char FILE_SEPARATOR[]{":"};
-        header() << style_ << FILE_BEGIN << filepath << FILE_SEPARATOR << line
-                 << FILE_END << CLEAR_FORMAT;
-        return *this;
-    }
-
     BaseHeaderless::BaseHeaderless()
         : level_{},
           output_{},

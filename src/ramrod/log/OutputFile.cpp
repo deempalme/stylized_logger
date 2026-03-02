@@ -14,7 +14,28 @@ namespace ramrod
         close();
     }
 
-    bool OutputFile::ok()
+    void OutputFile::clear()
+    {
+        close();
+        file_.open(filepath_, std::ios_base::out | std::ios_base::trunc);
+        is_open_ = file_.is_open();
+    }
+
+    void OutputFile::end()
+    {
+        // Nothing to do with ANSI format since files are not compatible with it, just
+        // adding a new line to the end of the file
+        /// @brief String used to add a new line to the end of the file
+        static constexpr char ENDL[]{"\n"};
+        file_ << ENDL;
+    }
+
+    void OutputFile::format(const char *ansi_format)
+    {
+        // Nothing to do since files are not compatible with ANSI format
+    }
+
+    bool OutputFile::verify_status()
     {
         // If file was properly opened but then was deleted, reopen it.
         if (is_open_ && !std::filesystem::exists(filepath_))
@@ -24,120 +45,6 @@ namespace ramrod
             is_open_ = file_.is_open();
         }
         return is_open_;
-    }
-
-    OutputFile &OutputFile::operator<<(const bool message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::int8_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::uint8_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::int8_t *message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::uint8_t *message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::int16_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::uint16_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::int32_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::uint32_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const float message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::int64_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::uint64_t message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const double message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const long double message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::string &message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::string_view &message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const void *message)
-    {
-        file_ << message;
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::exception &message)
-    {
-        file_ << message.what();
-        return *this;
-    }
-
-    OutputFile &OutputFile::operator<<(const std::error_code &message)
-    {
-        file_ << message.message();
-        return *this;
     }
 
     void OutputFile::close()

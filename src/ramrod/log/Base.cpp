@@ -4,174 +4,93 @@
 #include <cstdarg>
 #include <cstdio>
 
-namespace
-{
-    /// @brief String used to clear all ANSI format
-    static constexpr char CLEAR_FORMAT[]{""};
-} // Unnamed namespace
+#include "ramrod/log/OutputFile.hpp"
+
+/// @brief String used when the message is empty
+static constexpr char EMPTY_MESSAGE[]{""};
+/// @brief Size of the date buffer, string should contain "[2026-03-01 12:00:00 +0100]",
+///        hence it is 28 characters long, including the null terminator
+static constexpr size_t DATE_DEFAULT_BUFFER_SIZE{28ul};
+/// @brief Format used to print the date and time, e.g. "[2026-03-01 12:00:00 +0100]"
+static constexpr char DATE_DEFAULT_FORMAT[]{"[%Y-%m-%d %H:%M:%S %z]"};
+/// @brief String used when no format is necessary
+static constexpr char NO_FORMAT[]{""};
+/// @brief Size of the printf buffer
+static constexpr size_t PRINTF_BUFFER_DEFAULT_SIZE{1024ul};
 
 namespace ramrod
 {
-    Output Base::output_;
-
-    BaseHeaderless &Base::operator()()
-    {
-        const std::time_t t{std::time(nullptr)};
-        // output_ << style_ << std::put_time(std::localtime(&t), "[%Y-%m-%d %H:%M:%S]")
-        //         << level_string(level_) << CLEAR_FORMAT;
-        std::tm *tm = std::localtime(&t);
-        char buf[32];
-        std::strftime(buf, sizeof(buf), "[%Y-%m-%d %H:%M:%S]", tm);
-        output_ << _ansi_format << buf << CLEAR_FORMAT;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator()(const char *format, ...)
-    {
-        std::va_list args;
-        va_start(args, format);
-        char buf[1024];
-        std::vsnprintf(buf, sizeof(buf), format, args);
-        va_end(args);
-        output_ << buf;
-        return *this;
-    }
-
     Base::Base()
-        : BaseHeaderless(),
-          _ansi_format{""}
+        : _ansi_format{NO_FORMAT},
+          _level_tag{EMPTY_MESSAGE},
+          date_buffer_{std::make_unique<char>(DATE_DEFAULT_BUFFER_SIZE)},
+          date_buffer_size_{DATE_DEFAULT_BUFFER_SIZE},
+          date_format_{DATE_DEFAULT_FORMAT},
+          output_{},
+          printf_buffer_{std::make_unique<char>(PRINTF_BUFFER_DEFAULT_SIZE)},
+          printf_buffer_size_{PRINTF_BUFFER_DEFAULT_SIZE}
     {
     }
 
     Base::Base(const std::filesystem::path &output_path)
-        : BaseHeaderless(output_path),
-          _ansi_format{""}
+        : _ansi_format{NO_FORMAT},
+          _level_tag{EMPTY_MESSAGE},
+          date_buffer_{std::make_unique<char>(DATE_DEFAULT_BUFFER_SIZE)},
+          date_buffer_size_{DATE_DEFAULT_BUFFER_SIZE},
+          date_format_{DATE_DEFAULT_FORMAT},
+          output_{OutputFile(output_path)},
+          printf_buffer_{std::make_unique<char>(PRINTF_BUFFER_DEFAULT_SIZE)},
+          printf_buffer_size_{PRINTF_BUFFER_DEFAULT_SIZE}
     {
+    }
+
+    void Base::change_date_format(const std::string &date_format, const size_t date_buffer_size)
+    {
+        date_format_ = date_format;
+        date_buffer_size_ = date_buffer_size;
+        date_buffer_ = std::make_unique<char>(date_buffer_size_);
+    }
+
+    bool Base::change_log_output(const std::filesystem::path &output_path)
+    {
+        output_ = OutputFile{output_path};
+        return output_.verify_status();
     }
 
     int Base::printf(const char *format, ...)
     {
         std::va_list args;
         va_start(args, format);
-        char buf[1024];
-        int n = std::vsnprintf(buf, sizeof(buf), format, args);
+        int n{std::vsnprintf(printf_buffer_.get(), printf_buffer_size_, format, args)};
         va_end(args);
-        if (n > 0)
-            output_ << buf;
+        /// @brief Size of an empty string
+        static constexpr int EMPTY_STRING_SIZE{};
+        if (n > EMPTY_STRING_SIZE){
+            output_.format(_ansi_format);
+            output_(date(), _level_tag, printf_buffer_.get());
+            output_.end();
+        }
         return n;
     }
 
-    BaseHeaderless &Base::operator<<(const bool message)
+    size_t Base::printf_buffer_size() const
     {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
+        return printf_buffer_size_;
     }
 
-    BaseHeaderless &Base::operator<<(const std::int8_t message)
+    void Base::printf_buffer_size(const size_t new_size)
     {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
+        printf_buffer_ = std::make_unique<char>(new_size);
+        printf_buffer_size_ = new_size;
     }
 
-    BaseHeaderless &Base::operator<<(const std::int8_t *message)
+    const char *Base::date()
     {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::uint8_t message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::uint8_t *message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::int16_t message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::uint16_t message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::int32_t message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::uint32_t message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const float message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::int64_t message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::uint64_t message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const double message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const long double message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::string &message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::string_view &message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const void *message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::exception &message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
-    }
-
-    BaseHeaderless &Base::operator<<(const std::error_code &message)
-    {
-        BaseHeaderless::operator()(_ansi_format) << message;
-        return *this;
+        const std::time_t t{std::time(nullptr)};
+        std::strftime(date_buffer_.get(),
+                      date_buffer_size_,
+                      date_format_.c_str(),
+                      std::localtime(&t));
+        return date_buffer_.get();
     }
 } // namespace ramrod

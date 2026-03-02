@@ -2,124 +2,33 @@
 
 #include <iostream>
 
+/// @brief String used to clear all ANSI format: 0m - reset all styles
+static constexpr char CLEAR_FORMAT[]{"\e[0m"};
+/// @brief String used to clear the terminal:
+///        2J - clear screen
+///        H  - move cursor to home
+///        3J - clear screen and scrollback buffer
+static constexpr char CLEAR_TERMINAL[]{"\e[2J\e[H\e[3J"};
+
 namespace ramrod
 {
-    bool Output::ok()
+
+    void Output::clear()
+    {
+        std::cout << CLEAR_TERMINAL;
+    }
+    void Output::end()
+    {
+        std::cout << CLEAR_FORMAT << std::endl;
+    }
+
+    void Output::format(const char *ansi_format)
+    {
+        std::cout << ansi_format;
+    }
+
+    bool Output::verify_status()
     {
         return true;
-    }
-
-    Output &Output::operator<<(const bool message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::int8_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::uint8_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::int8_t *message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::uint8_t *message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::int16_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::uint16_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::int32_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::uint32_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const float message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::int64_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::uint64_t message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const double message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const long double message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::string &message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::string_view &message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const void *message)
-    {
-        std::cout << message;
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::exception &message)
-    {
-        std::cout << message.what();
-        return *this;
-    }
-
-    Output &Output::operator<<(const std::error_code &message)
-    {
-        std::cout << message.message();
-        return *this;
     }
 } // namespace ramrod

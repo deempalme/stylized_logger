@@ -1,29 +1,31 @@
 #ifndef RAMROD_LOG_ERROR_HPP
 #define RAMROD_LOG_ERROR_HPP
 
+#include <filesystem>
+
 #include "ramrod/log/Base.hpp"
 
 namespace ramrod
 {
+    /**
+     * @brief Logger for error-level messages (red ANSI color, "[ERROR]" tag).
+     */
     class Error : public Base
     {
     public:
-        static Error& instance();
-
-    private:
+        /** @brief Creates an error logger that writes to standard output. */
         Error();
-        Error(Error &object) = delete;
-        Error(const Error &object) = delete;
+
+        /**
+         * @brief Creates an error logger that writes to a file.
+         *
+         * @param output_path The path to the file to save messages to.
+         */
+        Error(const std::filesystem::path &output_path);
+
+        /** @brief Destructor. */
+        virtual ~Error() = default;
     };
-
-    inline static Error& error{Error::instance()};
 } // namespace ramrod
-
-/**
- * @brief Print timestamp, file, and line.
- *
- * @return Reference to \p Error instance
- */
-#define RR_LOGE error.header(__FILE__, __LINE__)
 
 #endif // RAMROD_LOG_ERROR_HPP
