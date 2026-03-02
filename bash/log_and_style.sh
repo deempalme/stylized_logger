@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Defining colors
-blue='\e[38;5;51m'
-green='\e[38;5;118m'
-red='\e[0;91m'
-yellow='\e[0;93m'
+blue="\e[38;5;51m"
+green="\e[38;5;118m"
+red="\e[0;91m"
+yellow="\e[0;93m"
 ## Clear all formatting
-clear='\e[0;0m'
+clear="\e[0m"
 
 ###
 ### Print a GREEN colored message in terminal

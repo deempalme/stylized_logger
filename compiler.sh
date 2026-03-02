@@ -15,6 +15,7 @@ project_name="RamRodLog"
 # Creates the build directory just in case it does not exist
 print_message "Creating directory"
 mkdir -p build
+check_error $? "Error creating directory"
 
 # Running CMake
 print_message "Configuring $project_name"
