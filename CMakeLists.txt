@@ -1,56 +1,70 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 
 if(NOT TARGET ${RamRodLog_LIBRARIES})
-  project(RamRodLog
-    VERSION 0.8.0
-    DESCRIPTION "Ram-Rod's log printer"
-    LANGUAGES CXX
-  )
+    project(RamRodLog
+        VERSION 0.9.0
+        DESCRIPTION "Ram-Rod's logger"
+        LANGUAGES CXX
+    )
 
-  set(${PROJECT_NAME}_INCLUDE_DIRS
-    ${PROJECT_SOURCE_DIR}/include
-    CACHE INTERNAL ""
-  )
-  set(${PROJECT_NAME}_LIBRARIES
-    ${PROJECT_NAME}
-    CACHE INTERNAL ""
-  )
+    set(INC_DIR include/ramrod/log)
+    set(SRC_DIR src/ramrod/log)
 
-  add_library(${PROJECT_NAME} STATIC)
+    # Header files
+    set(UNIT_HPP_FILES
+        ${INC_DIR}/Base.hpp
+        ${INC_DIR}/Debug.hpp
+        ${INC_DIR}/Error.hpp
+        ${INC_DIR}/Info.hpp
+        ${INC_DIR}/Logger.hpp
+        ${INC_DIR}/Output.hpp
+        ${INC_DIR}/OutputFile.hpp
+        ${INC_DIR}/Verbose.hpp
+        ${INC_DIR}/Warning.hpp
+    )
 
-  target_sources(${PROJECT_NAME}
-    PRIVATE
-      include/ramrod/log.h
-      include/ramrod/log_attention.h
-      include/ramrod/log_base.h
-      include/ramrod/log_error.h
-      include/ramrod/log_format.h
-      include/ramrod/log_good.h
-      include/ramrod/log_ostream.h
-      include/ramrod/log_perror.h
-      include/ramrod/log_types.h
-      include/ramrod/log_warning.h
+    # Source files
+    set(UNIT_CPP_FILES
+        ${SRC_DIR}/Base.cpp
+        ${SRC_DIR}/Debug.cpp
+        ${SRC_DIR}/Error.cpp
+        ${SRC_DIR}/Info.cpp
+        ${SRC_DIR}/Logger.cpp
+        ${SRC_DIR}/Output.cpp
+        ${SRC_DIR}/OutputFile.cpp
+        ${SRC_DIR}/Verbose.cpp
+        ${SRC_DIR}/Warning.cpp
+    )
 
-      src/ramrod/log.cpp
-      src/ramrod/log_attention.cpp
-      src/ramrod/log_base.cpp
-      src/ramrod/log_error.cpp
-      src/ramrod/log_format.cpp
-      src/ramrod/log_good.cpp
-      src/ramrod/log_ostream.cpp
-      src/ramrod/log_perror.cpp
-      src/ramrod/log_warning.cpp
-  )
+    set(${PROJECT_NAME}_INCLUDE_DIRS
+        ${PROJECT_SOURCE_DIR}/include
+        CACHE INTERNAL ""
+    )
+    set(${PROJECT_NAME}_LIBRARIES
+        ${PROJECT_NAME}
+        CACHE INTERNAL ""
+    )
 
-  target_include_directories(${PROJECT_NAME} BEFORE PUBLIC include)
+    add_library(${PROJECT_NAME} STATIC)
 
-  set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-      CXX_STANDARD          17
-      CXX_STANDARD_REQUIRED TRUE
-      CXX_EXTENSIONS        FALSE
-  )
+    target_sources(${PROJECT_NAME}
+        PRIVATE
+        # Project files
+        ${UNIT_CPP_FILES}
+        ${UNIT_HPP_FILES}
+    )
 
-  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+    target_include_directories(${PROJECT_NAME}
+        BEFORE PUBLIC
+        include
+    )
 
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED TRUE
+        CXX_EXTENSIONS FALSE
+    )
+
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 endif(NOT TARGET ${RamRodLog_LIBRARIES})
