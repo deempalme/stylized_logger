@@ -7,7 +7,7 @@
 # ::::::::: HELPER FUNCTIONS :::::::::
 
 print_message() {
-    print_green ">>>>>>>>>>>>>>>>>>> $1...\n\n"
+    print_yellow ">>>>>>>>>>>>>>>>>>> $1...\n\n"
 }
 
 project_name="RamRodLog"
@@ -24,14 +24,6 @@ check_error $? "Error configuring $project_name"
 print_message "Compiling $project_name"
 cd build
 # Using 70% of the available cores
-jobs=$(((nproc) * 70 / 100))
-if [[ "$jobs" -eq 0 ]]; then
-    # If the number of cores is 0, set the number of jobs to 1
-    jobs=1
-fi
+jobs=$(get_jobs 70)
 cmake --build . --target all -j $jobs
-check_error $? "Error compiling $project_name"
-
-print_message "Executing $project_name"
-./$project_name
-check_error $? "Error executing $project_name"
+check_error $? "Error compiling $project_name library"
