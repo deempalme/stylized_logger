@@ -9,6 +9,94 @@ yellow='\e[0;93m'
 clear='\e[0;0m'
 
 ###
+### Print a GREEN colored message in terminal
+###
+### This does not add a newline character at the end of the message
+###
+### Arguments:
+###     None
+###
+print_done(){
+    echo -e -n "${green}+++ Done!!!${clear}\n\n"
+}
+
+###
+### Check if the error code is not 0
+###
+### If it is not 0, print the error message and exit with the error code
+###
+### Arguments:
+###     $1  Error code
+###     $2  Error message
+###
+### Returns:
+###     Exits with the error code (if not 0)
+###
+### Example:
+###     check_error 1 "Error message"
+###
+check_error(){
+    local error_code
+    local message
+    error_code=$1
+    message=$2
+    if [[ "$error_code" -ne '0' ]]; then
+        date_string=$(date "+%Y-%m-%d %H:%M:%S %Z")
+        print_red "[$date_string][ERROR][code: $error_code] $message\n"
+        exit $error_code
+    fi
+    print_done
+}
+
+###
+### Clear all previous formatting
+###
+### Arguments:
+###     None
+###
+### Returns:
+###     Clears all previous formatting
+###
+clear_format(){
+    echo -e -n "$clear"
+}
+
+###
+### Get the number of jobs to use based on the percentage of the available cores
+###
+### Arguments:
+###     $1  Percentage of the available cores to use
+###
+### Returns:
+###     The number of jobs to use (minimum 1, maximum the number of available cores)
+###
+### Example:
+###     get_jobs 70 # Use 70% of the available cores
+###     get_jobs 100 # Use all available cores
+###     get_jobs # Use all available cores (default)
+###
+get_jobs(){
+    local jobs
+    local max_jobs
+    local percentage
+    percentage=$1
+    if [[ -z "$percentage" ]]; then
+        # Default percentage is 100 (use all available cores)
+        percentage=100
+    fi
+    max_jobs=$(nproc)
+    jobs=$((max_jobs * percentage / 100))
+    if [[ "$jobs" -eq 0 ]]; then
+        # Minimum number of jobs is 1
+        jobs=1
+    elif [[ "$jobs" -gt "$max_jobs" ]]; then
+        # Maximum number of jobs is the number of available cores
+        jobs=$max_jobs
+    fi
+    echo "$jobs"
+}
+
+###
 ### Print a BLUE colored message in terminal
 ###
 ### This does not add a newline character at the end of the message
@@ -77,44 +165,4 @@ print_red(){
 ###
 print_yellow(){
     echo -e -n "${yellow}$1${clear}"
-}
-
-###
-### Clear all previous formatting
-###
-### Arguments:
-###     None
-###
-### Returns:
-###     Clears all previous formatting
-###
-clear_format(){
-    echo -e -n "$clear"
-}
-
-###
-### Check if the error code is not 0
-###
-### If it is not 0, print the error message and exit with the error code
-###
-### Arguments:
-###     $1  Error code
-###     $2  Error message
-###
-### Returns:
-###     Exits with the error code (if not 0)
-###
-### Example:
-###     check_error 1 "Error message"
-###
-check_error(){
-    local error_code
-    local message
-    error_code=$1
-    message=$2
-    if [[ "$error_code" -ne '0' ]]; then
-        date_string=$(date +%Y-%m-%d_%H-%M-%S)
-        print_red "[$date_string][ERROR][code: $error_code] $message"
-        exit $error_code
-    fi
 }
