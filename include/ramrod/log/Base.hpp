@@ -2,12 +2,14 @@
 #define RAMROD_LOG_BASE_HPP
 
 #include <cstddef>
+#include <cstdint>
+#include <exception>
 #include <filesystem>
-#include <memory>
 #include <string>
-#include <utility>
+#include <string_view>
+#include <system_error>
 
-#include "ramrod/log/Output.hpp"
+#include "ramrod/log/BaseHeaderless.hpp"
 
 namespace ramrod
 {
@@ -18,7 +20,7 @@ namespace ramrod
      * Each line is prefixed with a timestamp and a configurable head message.
      * Output can be switched at runtime via change_log_output().
      */
-    class Base
+    class Base : public BaseHeaderless
     {
     public:
         /**
@@ -35,44 +37,10 @@ namespace ramrod
 
         /**
          * @brief Destructor.
+         *
+         * Deletes the date buffer, date format, and printf buffer.
          */
-        virtual ~Base() = default;
-
-        /**
-         * @brief Writes a log line with header (format, date, head message), forwarded arguments,
-         *        and reset ANSI format.
-         *
-         * Header is composed of:
-         * - ANSI color format which depends on the inherited class;
-         *   - Error messages are red,
-         *   - Warning messages are yellow,
-         *   - Debug messages are blue,
-         *   - Info messages are green,
-         *   - Verbose messages have default color.
-         * - Date
-         * - Level tag message which depends on the inherited class;
-         *   - Error messages are "[ERROR]",
-         *   - Warning messages are "[WARNING]",
-         *   - Debug messages are "[DEBUG]",
-         *   - Info messages are "[INFO]",
-         *   - Verbose messages are "[VERBOSE]".
-         * - Forwarded arguments which are printed as is
-         * - ANSI format to reset the attributes
-         *
-         * Output to a file will not contain the ANSI format strings (color and reset formats)
-         *
-         * @param args Values to write (forwarded to the output).
-         *
-         * @return Reference to this logger.
-         */
-        template <typename... Args>
-        Base &operator()(Args&&... args)
-        {
-            output_.format(_ansi_format);
-            output_(date(), _level_tag, std::forward<Args>(args)...);
-            output_.end();
-            return *this;
-        }
+        virtual ~Base();
 
         /**
          * @brief Changes the date format and the size of the date buffer.
@@ -81,8 +49,12 @@ namespace ramrod
          * @param date_buffer_size  The new size of the date buffer, it must be able to contain
          *                          the longest date format, including the null terminator,
          *                          e.g. 28 for "[2026-03-01 12:00:00 +0100]".
+         *
+         * @return True if the date format and buffer size were changed successfully.
+         *         If \p date_format is empty or \p date_buffer_size is 0, false is returned.
+         *         Also it will return false if the date format or buffer size cannot be allocated.
          */
-        void change_date_format(const std::string &date_format, const size_t date_buffer_size);
+        bool change_date_format(const std::string &date_format, const size_t date_buffer_size);
 
         /**
          * @brief Switches log output to a new file path.
@@ -125,9 +97,231 @@ namespace ramrod
          */
         void printf_buffer_size(const size_t new_size);
 
+        /**
+         * @brief Writes a log line with header (format, date, head message), forwarded arguments,
+         *        and reset ANSI format.
+         *
+         * Header is composed of:
+         * - ANSI color format which depends on the inherited class;
+         *   - Error messages are red,
+         *   - Warning messages are yellow,
+         *   - Debug messages are blue,
+         *   - Info messages are green,
+         *   - Verbose messages have default color.
+         * - Date
+         * - Level tag message which depends on the inherited class;
+         *   - Error messages are "[ERROR]",
+         *   - Warning messages are "[WARNING]",
+         *   - Debug messages are "[DEBUG]",
+         *   - Info messages are "[INFO]",
+         *   - Verbose messages are "[VERBOSE]".
+         * - Forwarded arguments which are printed as is
+         * - ANSI format to reset the attributes
+         *
+         * Output to a file will not contain the ANSI format strings (color and reset formats)
+         *
+         * @param args Values to write (forwarded to the output).
+         *
+         * @return Reference to this logger.
+         */
+        template <typename... Args>
+        Base &operator()(Args&&... args)
+        {
+            (*this << ... << std::forward<Args>(args));
+            end();
+            return *this;
+        }
+
+        /**
+         * @brief Writes a boolean value to the output.
+         *
+         * @param message The boolean value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const bool message);
+
+        /**
+         * @brief Writes a character to the output.
+         *
+         * @param message The character to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const char message);
+
+        /**
+         * @brief Writes a character to the output.
+         *
+         * @param message The character to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::int8_t message);
+
+        /**
+         * @brief Writes an unsigned character to the output.
+         *
+         * @param message The unsigned character to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::uint8_t message);
+
+        /**
+         * @brief Writes a null-terminated character string to the output.
+         *
+         * @param message The character string to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const char *message);
+
+        /**
+         * @brief Writes a null-terminated character string to the output.
+         *
+         * @param message The character string to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::int8_t *message);
+
+        /**
+         * @brief Writes a null-terminated unsigned character string to the output.
+         *
+         * @param message The unsigned character string to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::uint8_t *message);
+
+        /**
+         * @brief Writes a short integer value to the output.
+         *
+         * @param message The short integer value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::int16_t message);
+
+        /**
+         * @brief Writes an unsigned short integer value to the output.
+         *
+         * @param message The unsigned short integer value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::uint16_t message);
+
+        /**
+         * @brief Writes an integer value to the output.
+         *
+         * @param message The integer value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::int32_t message);
+
+        /**
+         * @brief Writes an unsigned integer value to the output.
+         *
+         * @param message The unsigned integer value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::uint32_t message);
+
+        /**
+         * @brief Writes a float value to the output.
+         *
+         * @param message The float value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const float message);
+
+        /**
+         * @brief Writes a long integer value to the output.
+         *
+         * @param message The long integer value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::int64_t message);
+
+        /**
+         * @brief Writes an unsigned long integer value to the output.
+         *
+         * @param message The unsigned long integer value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::uint64_t message);
+
+        /**
+         * @brief Writes a double value to the output.
+         *
+         * @param message The double value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const double message);
+
+        /**
+         * @brief Writes a long double value to the output.
+         *
+         * @param message The long double value to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const long double message);
+
+        /**
+         * @brief Writes a string to the output.
+         *
+         * @param message The string to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::string &message);
+
+        /**
+         * @brief Writes a string view to the output.
+         *
+         * @param message The string view to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::string_view &message);
+
+        /**
+         * @brief Writes a pointer address to the output.
+         *
+         * @param message The pointer to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const void *message);
+
+        /**
+         * @brief Writes an exception message to the output.
+         *
+         * @param message The exception to write (outputs what()).
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::exception &message);
+
+        /**
+         * @brief Writes an error code to the output.
+         *
+         * @param message The error code to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const std::error_code &message);
+
     protected:
-        /// @brief Format in ANSI escape codes used to colorize output text
-        const char *_ansi_format;
         /// @brief Logging level tag message that is printed at the beginning of each line
         ///        after the date and time
         const char *_level_tag;
@@ -144,16 +338,14 @@ namespace ramrod
         const char *date();
 
         /// @brief Buffer that contains the date string.
-        std::unique_ptr<char> date_buffer_;
+        char *date_buffer_;
         /// @brief Size of the date buffer in bytes, it must be able to contain the longest
         ///        date format, including the null terminator.
         size_t date_buffer_size_;
         /// @brief Date format used to print the date and time, e.g. "[%Y-%m-%d %H:%M:%S %z]".
-        std::string date_format_;
-        /// @brief Output stream (e.g. stdout or file).
-        Output output_;
+        char *date_format_;
         /// @brief Buffer used for printf-style formatting.
-        std::unique_ptr<char> printf_buffer_;
+        char *printf_buffer_;
         /// @brief Size of the printf buffer in bytes.
         size_t printf_buffer_size_;
     };

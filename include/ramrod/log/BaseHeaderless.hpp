@@ -1,7 +1,6 @@
 #ifndef RAMROD_LOG_BASE_HEADERLESS_HPP
 #define RAMROD_LOG_BASE_HEADERLESS_HPP
 
-#include <cstdarg>
 #include <cstdint>
 #include <exception>
 #include <filesystem>
@@ -13,7 +12,7 @@
 
 namespace ramrod
 {
-    class BaseHeaderless
+    class BaseHeaderless : public Output
     {
     public:
         /**
@@ -29,26 +28,18 @@ namespace ramrod
         BaseHeaderless(const std::filesystem::path &output_path);
 
         /**
+         * @brief Switches log output to a new file path.
+         *
+         * @param output_path The path to the file to write to.
+         *
+         * @return True if the new output was opened successfully, false otherwise.
+         */
+        bool change_log_output(const std::filesystem::path &output_path);
+
+        /**
          * @brief Destructor.
          */
         virtual ~BaseHeaderless() = default;
-
-        /**
-        * @brief Prints a message to the output with std::printf style format
-        *
-        * It works similar to `std::printf`; `const char *format` should contain how to interpret
-        * the data, look at [https://en.cppreference.com/w/cpp/io/c/fprintf]
-        * (https://en.cppreference.com/w/cpp/io/c/fprintf) to see all possible formats.
-        *
-        * @param format  Pointer to a null-terminated multibyte string specifying how
-        *                to interpret the data.
-        * @param ...     Variable argument list (multiple variables, multiple types)
-        *
-        * @return Number of characters written if successful or negative value if an error occurred.
-        */
-        int printf(const char *format, ...) __attribute__((format (printf, 2, 3)));
-
-        BaseHeaderless &operator()(const char *ansi_format);
 
         /**
          * @brief Writes a boolean value to the output.
@@ -58,6 +49,15 @@ namespace ramrod
          * @return Reference to current object.
          */
         BaseHeaderless &operator<<(const bool message);
+
+        /**
+         * @brief Writes a character to the output.
+         *
+         * @param message The character to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const char message);
 
         /**
          * @brief Writes a character to the output.
@@ -76,6 +76,15 @@ namespace ramrod
          * @return Reference to current object.
          */
         BaseHeaderless &operator<<(const std::uint8_t message);
+
+        /**
+         * @brief Writes a null-terminated character string to the output.
+         *
+         * @param message The character string to write.
+         *
+         * @return Reference to current object.
+         */
+        BaseHeaderless &operator<<(const char *message);
 
         /**
          * @brief Writes a null-terminated character string to the output.
@@ -221,9 +230,9 @@ namespace ramrod
          */
         BaseHeaderless &operator<<(const std::error_code &message);
 
-    private:
-        /// @brief Output stream
-        static Output output_;
+    protected:
+        /// @brief Format in ANSI escape codes used to colorize output text
+        const char *_ansi_format;
     };
 } // namespace ramrod
 

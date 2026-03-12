@@ -1,54 +1,129 @@
 #include "ramrod/log/Logger.hpp"
 
+#include "ramrod/log/OutputFile.hpp"
+#include "ramrod/log/OutputFileConsole.hpp"
+
 namespace ramrod
 {
-    Logger::Logger()
-        : debug{},
-          error{},
-          info{},
-          verbose{},
-          warning{}
-    {
-    }
+const std::filesystem::path Logger::TO_CONSOLE{""};
 
-    Logger::Logger(const std::filesystem::path &output_path)
-        : debug{output_path},
-          error{output_path},
-          info{output_path},
-          verbose{output_path},
-          warning{output_path}
-    {
-    }
+Logger::Logger()
+{
+    output(OutputType::CONSOLE, TO_CONSOLE);
+}
 
-    void Logger::change_date_format(const std::string &date_format, const size_t date_buffer_size)
-    {
-        debug.change_date_format(date_format, date_buffer_size);
-        error.change_date_format(date_format, date_buffer_size);
-        info.change_date_format(date_format, date_buffer_size);
-        verbose.change_date_format(date_format, date_buffer_size);
-        warning.change_date_format(date_format, date_buffer_size);
-    }
+Logger::Logger(const OutputType type, const std::filesystem::path& path)
+{
+    output(type, path);
+}
 
-    bool Logger::change_log_output(const std::filesystem::path &output_path)
-    {
-        return debug.change_log_output(output_path) &&
-               error.change_log_output(output_path) &&
-               info.change_log_output(output_path) &&
-               verbose.change_log_output(output_path) &&
-               warning.change_log_output(output_path);
-    }
+Debug& Logger::debug()
+{
+    return debug_;
+}
 
-    size_t Logger::printf_buffer_size() const
-    {
-        return error.printf_buffer_size();
-    }
+Error& Logger::error()
+{
+    return error_;
+}
 
-    void Logger::printf_buffer_size(const size_t new_size)
+Info& Logger::info()
+{
+    return info_;
+}
+
+Verbose& Logger::verbose()
+{
+    return verbose_;
+}
+
+Warning& Logger::warning()
+{
+    return warning_;
+}
+
+void Logger::clear()
+{
+    output_.clear();
+}
+
+const char* Logger::date_format() const
+{
+    return output_.date_format();
+}
+
+bool Logger::date_format(const std::string& date_format, const size_t date_buffer_size)
+{
+    return output_.date_format(date_format, date_buffer_size);
+}
+
+void Logger::end()
+{
+    output_.end();
+}
+
+void Logger::flush()
+{
+    output_.flush();
+}
+
+size_t Logger::printf_buffer_size() const
+{
+    return output_.printf_buffer_size();
+}
+
+void Logger::printf_buffer_size(const size_t new_size)
+{
+    otuput_.printf_buffer_size(new_size);
+}
+
+const std::filesystem::path& Logger::output() const
+{
+    return output_.output();
+}
+
+bool Logger::output(const OutputType type, const std::filesystem::path& path)
+{
+    const bool success{change_output(type, path)};
+
+    // Setting the new output to all the loggers
+    debug_ = Debug{output_};
+    error_ = Error{output_};
+    info_ = Info{output_};
+    verbose_ = Verbose{output_};
+    warning_ = Warning{output_};
+
+    return success;
+}
+
+bool Logger::verify_status() const
+{
+    return output_.verify_status();
+}
+
+bool Logger::change_output(const OutputType type, const std::filesystem::path& path)
+{
+    if ((type == OutputType::FILE_AND_CONSOLE) && !path.empty())
     {
-        debug.printf_buffer_size(new_size);
-        error.printf_buffer_size(new_size);
-        info.printf_buffer_size(new_size);
-        verbose.printf_buffer_size(new_size);
-        warning.printf_buffer_size(new_size);
+        output_ = OutputFileConsole{path};
+        return output_.verify_status();
     }
+    else if ((type == OutputType::FILE) && !path.empty())
+    {
+        output_ = OutputFile{path};
+        return output_.verify_status();
+    }
+    else if ((type != OutputType::CONSOLE) && path.empty())
+    {
+        output_ = Output{};
+        return false;
+    }
+    else
+    {
+        output_ = Output{};
+        return true;
+    }
+}
+
+static Logger global_logger{};
 } // namespace ramrod
