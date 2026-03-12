@@ -1,5 +1,5 @@
-#ifndef RAMROD_LOG_OUTPUT_FILE_HPP
-#define RAMROD_LOG_OUTPUT_FILE_HPP
+#ifndef RAMROD_LOG_OUTPUT_FILE_CONSOLE_HPP
+#define RAMROD_LOG_OUTPUT_FILE_CONSOLE_HPP
 
 #include "ramrod/log/Output.hpp"
 
@@ -9,13 +9,13 @@
 namespace ramrod
 {
 /**
- * @brief Log output that writes messages to a file.
+ * @brief Log output that writes messages to a file and the standard output stream.
  *
- * Writes all streamed content to a file at the given path. The file is opened
- * in append mode. If the file is deleted while in use, it is recreated on the
- * next write when verify_status() is checked.
+ * Writes all streamed content to a file at the given path and the standard output stream.
+ * The file is opened in append mode. If the file is deleted while in use, it is recreated
+ * on the next write when verify_status() is checked.
  */
-class OutputFile final : public Output
+class OutputFileConsole final : public Output
 {
   public:
     /**
@@ -23,45 +23,52 @@ class OutputFile final : public Output
      *
      * @param filepath  The path to the file to write to.
      */
-    OutputFile(const std::filesystem::path& filepath);
+    OutputFileConsole(const std::filesystem::path& filepath);
 
     /**
      * @brief Destructor; closes the file and releases the stream.
      */
-    ~OutputFile() override;
+    ~OutputFileConsole() override;
 
     /**
-     * @brief Clears the file (truncates to zero size).
+     * @brief Clears the file and the standard output stream.
      */
     void clear() override;
 
     /**
-     * @brief Do nothing since files are not compatible with ANSI format.
+     * @brief Clear the ANSI format from the standard output stream.
+     *
+     * Does nothing to file since it is not compatible with ANSI format.
      */
     void clear_format() override;
 
     /**
-     * @brief Ends the current line by adding a new line to the end of the file.
+     * @brief Ends the current line by adding a new line to the end of the file and
+     * the standard output stream.
      */
     void end() override;
 
     /**
-     * @brief Writes the file and line information to the output.
+     * @brief Writes the file and line information to the file and the standard output stream.
      *
      * @param file  The file name.
      * @param line  The line number.
      *
      * @return Reference to current object.
      */
-    OutputFile& file_info(const char* file, const int line) override;
+    OutputFileConsole& file_info(const char* file, const int line) override;
 
     /**
-     * @brief Flushes the file stream to the file.
+     * @brief Flushes the file and the standard output stream.
      */
     void flush() override;
 
     /**
-     * @brief Do nothing since files are not compatible with ANSI format.
+     * @brief Apply ansi format to the standard output stream.
+     *
+     * Does nothing to file since it is not compatible with ANSI format.
+     *
+     * @param ansi_format Null-terminated string with ANSI escape codes (e.g. for color).
      */
     void format(const char* ansi_format) override;
 
@@ -75,23 +82,13 @@ class OutputFile final : public Output
     void header(const char* ansi_format, const char* date, const char* level_tag) override;
 
     /**
-     * @brief Checks if the file is open and writable.
-     *
-     * If the file was deleted after being opened, it will be recreated on the next write
-     * when verify_status() is called.
-     *
-     * @return True if the file is open, false otherwise.
-     */
-    bool verify_status() override;
-
-    /**
      * @brief Writes a boolean value to the output.
      *
      * @param message The boolean value to write.
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const bool message) override;
+    OutputFileConsole& operator<<(const bool message) override;
 
     /**
      * @brief Writes a character to the output.
@@ -100,7 +97,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const char message) override;
+    OutputFileConsole& operator<<(const char message) override;
 
     /**
      * @brief Writes a character to the output.
@@ -109,7 +106,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::int8_t message) override;
+    OutputFileConsole& operator<<(const std::int8_t message) override;
 
     /**
      * @brief Writes an unsigned character to the output.
@@ -118,7 +115,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::uint8_t message) override;
+    OutputFileConsole& operator<<(const std::uint8_t message) override;
 
     /**
      * @brief Writes a null-terminated character string to the output.
@@ -127,7 +124,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const char* message) override;
+    OutputFileConsole& operator<<(const char* message) override;
 
     /**
      * @brief Writes a null-terminated character string to the output.
@@ -136,7 +133,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::int8_t* message) override;
+    OutputFileConsole& operator<<(const std::int8_t* message) override;
 
     /**
      * @brief Writes a null-terminated unsigned character string to the output.
@@ -145,7 +142,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::uint8_t* message) override;
+    OutputFileConsole& operator<<(const std::uint8_t* message) override;
 
     /**
      * @brief Writes a short integer value to the output.
@@ -154,7 +151,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::int16_t message) override;
+    OutputFileConsole& operator<<(const std::int16_t message) override;
 
     /**
      * @brief Writes an unsigned short integer value to the output.
@@ -163,7 +160,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::uint16_t message) override;
+    OutputFileConsole& operator<<(const std::uint16_t message) override;
 
     /**
      * @brief Writes an integer value to the output.
@@ -172,7 +169,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::int32_t message) override;
+    OutputFileConsole& operator<<(const std::int32_t message) override;
 
     /**
      * @brief Writes an unsigned integer value to the output.
@@ -181,7 +178,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::uint32_t message) override;
+    OutputFileConsole& operator<<(const std::uint32_t message) override;
 
     /**
      * @brief Writes a float value to the output.
@@ -190,7 +187,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const float message) override;
+    OutputFileConsole& operator<<(const float message) override;
 
     /**
      * @brief Writes a long integer value to the output.
@@ -199,7 +196,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::int64_t message) override;
+    OutputFileConsole& operator<<(const std::int64_t message) override;
 
     /**
      * @brief Writes an unsigned long integer value to the output.
@@ -208,7 +205,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::uint64_t message) override;
+    OutputFileConsole& operator<<(const std::uint64_t message) override;
 
     /**
      * @brief Writes a double value to the output.
@@ -217,7 +214,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const double message) override;
+    OutputFileConsole& operator<<(const double message) override;
 
     /**
      * @brief Writes a long double value to the output.
@@ -226,7 +223,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const long double message) override;
+    OutputFileConsole& operator<<(const long double message) override;
 
     /**
      * @brief Writes a string to the output.
@@ -235,7 +232,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::string& message) override;
+    OutputFileConsole& operator<<(const std::string& message) override;
 
     /**
      * @brief Writes a string view to the output.
@@ -244,7 +241,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::string_view& message) override;
+    OutputFileConsole& operator<<(const std::string_view& message) override;
 
     /**
      * @brief Writes a pointer address to the output.
@@ -253,7 +250,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const void* message) override;
+    OutputFileConsole& operator<<(const void* message) override;
 
     /**
      * @brief Writes an exception message to the output.
@@ -262,7 +259,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::exception& message) override;
+    OutputFileConsole& operator<<(const std::exception& message) override;
 
     /**
      * @brief Writes an error code to the output.
@@ -271,7 +268,7 @@ class OutputFile final : public Output
      *
      * @return Reference to current object.
      */
-    OutputFile& operator<<(const std::error_code& message) override;
+    OutputFileConsole& operator<<(const std::error_code& message) override;
 
   private:
     /**
@@ -288,4 +285,4 @@ class OutputFile final : public Output
 };
 } // namespace ramrod
 
-#endif // RAMROD_LOG_OUTPUT_FILE_HPP
+#endif // RAMROD_LOG_OUTPUT_FILE_CONSOLE_HPP
