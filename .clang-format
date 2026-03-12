@@ -1,0 +1,56 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Braces (Allman: new line before {)
+BreakBeforeBraces: Allman
+
+# Line length
+ColumnLimit: 100
+
+# Includes: sort and group
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"ramrod/'
+    Priority: 1
+  - Regex: '^"'
+    Priority: 2
+  - Regex: '^<'
+    Priority: 3
+
+# Spacing
+SpaceAfterTemplateKeyword: true
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+
+# Other
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+PointerAlignment: Left
+FixNamespaceComments: true
+
+# Access modifiers & class layout
+AccessModifierOffset: -2   # align private: and public: with class
+BreakInheritanceList: BeforeColon
+
+# Comments
+ReflowComments: true
+SpacesBeforeTrailingComments: 1
+BreakStringLiterals: false
+BreakConstructorInitializers: BeforeColon
+
+# Namespaces & blocks
+CompactNamespaces: false
+NamespaceIndentation: Inner
