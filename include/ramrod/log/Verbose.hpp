@@ -1,8 +1,6 @@
 #ifndef RAMROD_LOG_VERBOSE_HPP
 #define RAMROD_LOG_VERBOSE_HPP
 
-#include <filesystem>
-
 #include "ramrod/log/Base.hpp"
 
 namespace ramrod
@@ -13,15 +11,12 @@ namespace ramrod
     class Verbose : public Base
     {
     public:
-        /** @brief Creates a verbose logger that writes to standard output. */
-        Verbose();
-
         /**
-         * @brief Creates a verbose logger that writes to a file.
+         * @brief Creates a verbose logger that writes to the given writer.
          *
-         * @param output_path The path to the file to save messages to.
+         * @param writer The object used to write messages.
          */
-        Verbose(const std::filesystem::path &output_path);
+        Verbose(Writer& writer);
 
         /** @brief Destructor. */
         virtual ~Verbose() = default;

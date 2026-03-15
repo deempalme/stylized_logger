@@ -1,8 +1,6 @@
 #ifndef RAMROD_LOG_WARNING_HPP
 #define RAMROD_LOG_WARNING_HPP
 
-#include <filesystem>
-
 #include "ramrod/log/Base.hpp"
 
 namespace ramrod
@@ -13,15 +11,12 @@ namespace ramrod
     class Warning : public Base
     {
     public:
-        /** @brief Creates a warning logger that writes to standard output. */
-        Warning();
-
         /**
-         * @brief Creates a warning logger that writes to a file.
+         * @brief Creates a warning logger that writes to the given writer.
          *
-         * @param output_path The path to the file to save messages to.
+         * @param writer The object used to write messages.
          */
-        Warning(const std::filesystem::path &output_path);
+        Warning(Writer& writer);
 
         /** @brief Destructor. */
         virtual ~Warning() = default;

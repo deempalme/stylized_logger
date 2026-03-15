@@ -2,14 +2,17 @@
 #define RAMROD_LOG_LOGGER_HPP
 
 #include "ramrod/log/Debug.hpp"
+#include "ramrod/log/Endl.hpp"
 #include "ramrod/log/Error.hpp"
+#include "ramrod/log/File.hpp"
 #include "ramrod/log/Info.hpp"
-#include "ramrod/log/Output.hpp"
 #include "ramrod/log/Verbose.hpp"
 #include "ramrod/log/Warning.hpp"
+#include "ramrod/log/Writer.hpp"
 
 #include <cstddef>
 #include <filesystem>
+#include <memory>
 #include <string>
 
 namespace ramrod
@@ -49,10 +52,11 @@ namespace ramrod
  */
 class Logger
 {
-  public:
+public:
     /** @brief Create a logger set that writes to standard output. */
     Logger();
 
+    /** @brief Output destination for log messages. */
     enum class OutputType
     {
         /// @brief Output to standard output (stdout and stderr).
@@ -79,20 +83,44 @@ class Logger
     /** @brief Destructor. */
     virtual ~Logger() = default;
 
-    /// @brief Logger for debug-level messages. Messages are printed in blue and are
-    ///        prefixed with "[DEBUG]".
+    /**
+     * @brief Logger for debug-level messages. Messages are printed in blue and are
+     *        prefixed with "[DEBUG]".
+     *
+     * @return Reference to the debug-level logger.
+     */
     Debug& debug();
-    /// @brief Logger for error-level messages. Messages are printed in red and are
-    ///        prefixed with "[ERROR]".
+
+    /**
+     * @brief Logger for error-level messages. Messages are printed in red and are
+     *        prefixed with "[ERROR]".
+     *
+     * @return Reference to the error-level logger.
+     */
     Error& error();
-    /// @brief Logger for info-level messages. Messages are printed in green and are
-    ///        prefixed with "[INFO]".
+
+    /**
+     * @brief Logger for info-level messages. Messages are printed in green and are
+     *        prefixed with "[INFO]".
+     *
+     * @return Reference to the info-level logger.
+     */
     Info& info();
-    /// @brief Logger for verbose-level messages. Messages are printed in default color
-    ///        and are prefixed with "[VERBOSE]".
+
+    /**
+     * @brief Logger for verbose-level messages. Messages are printed in default color
+     *        and are prefixed with "[VERBOSE]".
+     *
+     * @return Reference to the verbose-level logger.
+     */
     Verbose& verbose();
-    /// @brief Logger for warning-level messages. Messages are printed in yellow and are
-    ///        prefixed with "[WARNING]".
+
+    /**
+     * @brief Logger for warning-level messages. Messages are printed in yellow and are
+     *        prefixed with "[WARNING]".
+     *
+     * @return Reference to the warning-level logger.
+     */
     Warning& warning();
 
     /**
@@ -169,38 +197,57 @@ class Logger
      */
     bool output(const OutputType type, const std::filesystem::path& path = TO_CONSOLE);
 
+private:
     /**
-     * @brief Check if the output is still open when logger is writting to a file.
+     * @brief Switch underlying writers and reinitialize level loggers for the given output.
      *
-     * If the file is deleted while the logger is writting to it, it will reopen the file.
+     * @param type  The type of output to switch to.
+     * @param path  If \p type is \p FILE or \p FILE_AND_CONSOLE, the path to the log file.
      *
-     * @return True if the output is still open, or when writting to standard output
-     *         (stdout and stderr), false if it was not possible to reopen the file.
+     * @return True if the new output was opened successfully, false otherwise.
      */
-    bool verify_status() const;
-
-  private:
     bool change_output(const OutputType type, const std::filesystem::path& path);
 
-    Output output_;
+    /// @brief Writer for stdout (info, verbose, warning, debug); unique_ptr to avoid slicing.
+    std::unique_ptr<Writer> writer_;
+    /// @brief Writer for stderr (error); unique_ptr to avoid slicing from WriterCerr/WriterFileCerr.
+    std::unique_ptr<Writer> writer_cerr_;
+    /// @brief Log file when output is FILE or FILE_AND_CONSOLE.
+    std::unique_ptr<File> file_;
 
-    Debug debug_;
-    Error error_;
-    Info info_;
-    Verbose verbose_;
-    Warning warning_;
+    /// @brief Debug-level logger.
+    std::unique_ptr<Debug> debug_;
+    /// @brief Error-level logger.
+    std::unique_ptr<Error> error_;
+    /// @brief Info-level logger.
+    std::unique_ptr<Info> info_;
+    /// @brief Verbose-level logger.
+    std::unique_ptr<Verbose> verbose_;
+    /// @brief Warning-level logger.
+    std::unique_ptr<Warning> warning_;
 };
 
-static Logger global_logger;
+/// @brief Global logger instance for process-wide use.
+extern Logger global_logger;
+/// @brief Global newline object.
+extern const Endl endl;
 } // namespace ramrod
 
 #ifndef RR_LOG
-#define RR_LOG global_logger
-#define RR_LOGD global_logger.debug().file_info(__FILE__, __LINE__)
-#define RR_LOGE global_logger.error().file_info(__FILE__, __LINE__)
-#define RR_LOGI global_logger.info().file_info(__FILE__, __LINE__)
-#define RR_LOGV global_logger.verbose().file_info(__FILE__, __LINE__)
-#define RR_LOGW global_logger.warning().file_info(__FILE__, __LINE__)
+/// @brief Shorthand for the global logger.
+#define RR_LOG ramrod::global_logger
+/// @brief Global logger at debug level with file/line info.
+#define RR_LOGD ramrod::global_logger.debug().file_info(__FILE__, __LINE__)
+/// @brief Global logger at error level with file/line info.
+#define RR_LOGE ramrod::global_logger.error().file_info(__FILE__, __LINE__)
+/// @brief Global logger at info level with file/line info.
+#define RR_LOGI ramrod::global_logger.info().file_info(__FILE__, __LINE__)
+/// @brief Global logger at verbose level with file/line info.
+#define RR_LOGV ramrod::global_logger.verbose().file_info(__FILE__, __LINE__)
+/// @brief Global logger at warning level with file/line info.
+#define RR_LOGW ramrod::global_logger.warning().file_info(__FILE__, __LINE__)
+/// @brief Global newline object.
+#define RR_ENDL ramrod::endl
 #endif
 
 #endif // RAMROD_LOG_LOGGER_HPP
