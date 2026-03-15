@@ -13,8 +13,19 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(RamRodLogTests
-    test_output.cpp
+    test_base.cpp
+    test_debug.cpp
+    test_error.cpp
+    test_file.cpp
+    test_info.cpp
     test_logger.cpp
+    test_verbose.cpp
+    test_warning.cpp
+    test_writer.cpp
+    test_writer_cerr.cpp
+    test_writer_file.cpp
+    test_writer_file_cerr.cpp
+    test_writer_file_cout.cpp
 )
 
 target_link_libraries(RamRodLogTests
@@ -36,4 +47,6 @@ set_target_properties(RamRodLogTests
 )
 
 include(GoogleTest)
-gtest_discover_tests(RamRodLogTests)
+# Use add_test instead of gtest_discover_tests so the executable is not run at build time
+# (avoids build failure when the test binary crashes during discovery).
+add_test(NAME RamRodLogTests COMMAND RamRodLogTests)
