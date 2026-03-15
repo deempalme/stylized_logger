@@ -1,8 +1,6 @@
 #ifndef RAMROD_LOG_ERROR_HPP
 #define RAMROD_LOG_ERROR_HPP
 
-#include <filesystem>
-
 #include "ramrod/log/Base.hpp"
 
 namespace ramrod
@@ -13,15 +11,12 @@ namespace ramrod
     class Error : public Base
     {
     public:
-        /** @brief Creates an error logger that writes to standard output. */
-        Error();
-
         /**
-         * @brief Creates an error logger that writes to a file.
+         * @brief Creates an error logger that writes to the given writer.
          *
-         * @param output_path The path to the file to save messages to.
+         * @param writer The object used to write messages.
          */
-        Error(const std::filesystem::path &output_path);
+        Error(Writer& writer);
 
         /** @brief Destructor. */
         virtual ~Error() = default;

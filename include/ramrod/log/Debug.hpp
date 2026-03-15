@@ -1,8 +1,6 @@
 #ifndef RAMROD_LOG_DEBUG_HPP
 #define RAMROD_LOG_DEBUG_HPP
 
-#include <filesystem>
-
 #include "ramrod/log/Base.hpp"
 
 namespace ramrod
@@ -13,15 +11,12 @@ namespace ramrod
     class Debug : public Base
     {
     public:
-        /** @brief Creates a debug logger that writes to standard output. */
-        Debug();
-
         /**
-         * @brief Creates a debug logger that writes to a file.
+         * @brief Creates a debug logger that writes to the given writer.
          *
-         * @param output_path The path to the file to save messages to.
+         * @param writer The object used to write messages.
          */
-        Debug(const std::filesystem::path &output_path);
+        Debug(Writer& writer);
 
         /** @brief Destructor. */
         virtual ~Debug() = default;

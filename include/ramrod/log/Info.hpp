@@ -1,8 +1,6 @@
 #ifndef RAMROD_LOG_INFO_HPP
 #define RAMROD_LOG_INFO_HPP
 
-#include <filesystem>
-
 #include "ramrod/log/Base.hpp"
 
 namespace ramrod
@@ -13,15 +11,12 @@ namespace ramrod
     class Info : public Base
     {
     public:
-        /** @brief Creates an info logger that writes to standard output. */
-        Info();
-
         /**
-         * @brief Creates an info logger that writes to a file.
+         * @brief Creates an info logger that writes to the given writer.
          *
-         * @param output_path The path to the file to save messages to.
+         * @param writer The object used to write messages.
          */
-        Info(const std::filesystem::path &output_path);
+        Info(Writer& writer);
 
         /** @brief Destructor. */
         virtual ~Info() = default;
