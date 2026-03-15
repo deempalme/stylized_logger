@@ -42,7 +42,7 @@ PointerAlignment: Left
 FixNamespaceComments: true
 
 # Access modifiers & class layout
-AccessModifierOffset: -2   # align private: and public: with class
+AccessModifierOffset: -4   # align public:/private:/protected: with "class" (same indent)
 BreakInheritanceList: BeforeColon
 
 # Comments
@@ -50,6 +50,7 @@ ReflowComments: true
 SpacesBeforeTrailingComments: 1
 BreakStringLiterals: false
 BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: Never
 
 # Namespaces & blocks
 CompactNamespaces: false
