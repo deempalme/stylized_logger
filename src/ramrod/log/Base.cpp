@@ -1,7 +1,5 @@
 #include "ramrod/log/Base.hpp"
 
-#include "Constants.hpp"
-
 #include <cstdarg>
 #include <cstdio>
 
