@@ -1,19 +1,40 @@
 # RamRod Log
 
-C++ library for stylized console and file logging with timestamps, level tags, and optional ANSI colors.
+C++ library for stylized console and file logging with timestamps, level tags, and colors.
+
+## Index
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Building](#building)
+  - [As a subdirectory](#as-a-subdirectory)
+  - [Standalone (from the log directory)](#standalone-from-the-log-directory)
+- [Testing](#testing)
+- [How to use](#how-to-use)
+  - [Include](#include)
+  - [Log to standard output](#log-to-standard-output)
+  - [Log to a file](#log-to-a-file)
+  - [Switch output at runtime](#switch-output-at-runtime)
+  - [printf-style formatting](#printf-style-formatting)
+  - [Date format](#date-format)
+  - [Global logger and macros](#global-logger-and-macros)
+  - [Single-level loggers](#single-level-loggers)
+- [Message format](#message-format)
+- [API summary](#api-summary)
+- [License](#license)
 
 ## Features
 
 - **Log levels**: Debug, Error, Info, Verbose, Warning — each with a distinct tag and color (on terminal).
-- **Output**: Standard output (colored when supported) or a file (no ANSI codes in file).
+- **Output**: Console (stdout/stderr), file only, or file and console (`OutputType::CONSOLE`, `FILE`, `FILE_AND_CONSOLE`).
 - **Format**: Each line is prefixed with `[YYYY-MM-DD HH:MM:SS +zzzz][LEVEL]` then your message.
-- **API**: Call-style `logger.error("message")` or `logger.info("value: ", x)` with multiple arguments; optional `printf`-style formatting.
-- **Runtime**: Switch output to another file or change date format and buffer sizes without recreating the logger.
+- **API**: Stream-style `logger.info() << "message" << value` and `printf`-style formatting on level loggers.
+- **Runtime**: Switch output via `output(OutputType, path)`; set date format and printf buffer size without recreating the logger.
 
 ## Requirements
 
 - **C++17**
-- **CMake** 3.15 or later
+- **CMake** 3.22 or later
 - **Dependencies**: none (uses only the C++ standard library)
 
 ## Building
@@ -29,6 +50,8 @@ target_link_libraries(your_target PRIVATE ${RamRodLog_LIBRARIES})
 target_include_directories(your_target PRIVATE ${RamRodLog_INCLUDE_DIRS})
 ```
 
+(Adjust to match your project’s CMake variables for the log library.)
+
 ### Standalone (from the log directory)
 
 ```bash
@@ -37,7 +60,22 @@ cmake ..
 cmake --build .
 ```
 
-Or run `compile.sh` bash script (it should be compiled inside _build_ directory)
+Or run the `compile.sh` script from the project root; it configures and builds in the `build` directory.
+
+## Testing
+
+Unit tests use Google Test. Build with tests enabled, then run the test executable:
+
+```bash
+./tests/run_tests.sh
+```
+
+Run a subset of tests by passing a GTest filter:
+
+```bash
+./tests/run_tests.sh "LoggerTest.*"
+./tests/run_tests.sh --gtest_filter=LoggerTest.DefaultConstruction
+```
 
 ## How to use
 
@@ -49,16 +87,16 @@ Or run `compile.sh` bash script (it should be compiled inside _build_ directory)
 
 ### Log to standard output
 
-Create a `Logger` and use the level members: `debug`, `error`, `info`, `verbose`, `warning`. Call them with `operator()` with one or more arguments (any type that can be streamed with `<<`).
+Create a `Logger` (default constructor) and use the level accessors with the stream operator `<<`:
 
 ```cpp
 ramrod::Logger log;
 
-log.error("Connection failed");
-log.info("User count: ", 42);
-log.debug("State: ", state_name, " code: ", code);
-log.warning("Low memory: ", free_mb, " MB");
-log.verbose("Detail: ", detail_string);
+log.error() << "Connection failed";
+log.info() << "User count: " << 42;
+log.debug() << "State: " << state_name << " code: " << code;
+log.warning() << "Low memory: " << free_mb << " MB";
+log.verbose() << "Detail: " << detail_string;
 ```
 
 Output on terminal (with colors) looks like:
@@ -78,97 +116,119 @@ Output on terminal (with colors) looks like:
 
 ### Log to a file
 
-Construct the logger with a path. All levels write to the same file. File output has no ANSI color codes.
+Construct the logger with an output type and path. All levels write to the same file. File output has no ANSI color codes.
 
 ```cpp
-ramrod::Logger log("/var/log/myapp.log");
+ramrod::Logger log(ramrod::Logger::OutputType::FILE, "/var/log/myapp.log");
 
-log.info("Application started");
-log.error("Error: ", error_message);
+log.info() << "Application started";
+log.error() << "Error: " << error_message;
 ```
-
-If the log file can be **deleted while the application is running** (e.g. by log rotation or an external tool), you must call **`verify_status()`** so the file is recreated when missing. The library does not call it automatically. When using `OutputFile` directly, call `verify_status()` before writing (or periodically); it returns `true` if the file is open (or was successfully reopened), `false` otherwise.
 
 ### Switch output at runtime
 
-You can redirect all levels to a new file without creating a new logger:
+Redirect all levels to a new file or back to console without creating a new logger:
 
 ```cpp
 ramrod::Logger log;
-log.info("This goes to stdout");
+log.info() << "This goes to stdout";
 
-if (!log.change_log_output("/var/log/myapp.log"))
+if (!log.output(ramrod::Logger::OutputType::FILE, "/var/log/myapp.log"))
     std::cerr << "Failed to open log file\n";
 else
-    log.info("This goes to the file");
+    log.info() << "This goes to the file";
+
+// Back to console
+log.output(ramrod::Logger::OutputType::CONSOLE);
 ```
 
 ### printf-style formatting
 
-Use `printf` on any level logger for formatted messages. The default buffer size is 1024 bytes; increase it if you need longer lines.
+Use `.printf()` on any level logger. The default buffer size is 1024 bytes; increase it if you need longer lines.
 
 ```cpp
 ramrod::Logger log;
 
-log.error.printf("Error code %d: %s\n", errno, strerror(errno));
-log.info.printf("Progress: %3d%%\n", percent);
+log.error().printf("Error code %d: %s\n", errno, strerror(errno));
+log.info().printf("Progress: %3d%%\n", percent);
 
-// Optional: increase buffer for long lines
 log.printf_buffer_size(4096);
-log.info.printf("Long message: %s ...\n", long_string);
+log.info().printf("Long message: %s ...\n", long_string);
 ```
 
-### Customize date format
+### Date format
 
-Change the date format and the size of the internal date buffer (must fit the formatted string including null terminator):
+Set the date format and the size of the internal date buffer (must fit the formatted string including null terminator):
 
 ```cpp
 ramrod::Logger log;
 
 // Default is "[%Y-%m-%d %H:%M:%S %z]" (e.g. [2026-02-16 14:30:00 +0100])
 // The number 23 includes the null terminator character
-log.change_date_format("[%Y-%m-%d %H:%M:%S]", 23);
+log.date_format("[%Y-%m-%d %H:%M:%S]", 23);
+log.info() << "After format change";
+// Prints: "[2026-02-16 14:30:00][INFO] After format change"
 ```
 
-### Use a single level (e.g. only Error)
+### Global logger and macros
 
-If you only need one level, use `ramrod::Error`, `ramrod::Info`, etc. directly:
+A global logger and convenience macros are available :
 
 ```cpp
-#include "ramrod/log/Error.hpp"
+#include "ramrod/log/Logger.hpp"
 
-ramrod::Error err("/var/log/errors.log");
-err("Something went wrong: ", details);
-err.printf("Code: %d\n", code);
+// Changing output log file
+RR_LOG.output("/log/new_log_file.log");
+
+RR_LOGI << "info message" << RR_ENDL;
+// Prints: [2026-02-16 14:30:00 +0100][INFO][file_name.cpp][258] info message\n
+RR_LOGE << "error at " << __FILE__ << RR_ENDL;
+// Prints: [2026-02-16 14:30:00 +0100][ERROR][another_file.cpp][18] error at /home/user/another_file.cpp\n
 ```
 
-Same pattern for `ramrod::Debug`, `ramrod::Info`, `ramrod::Verbose`, `ramrod::Warning`.
+| Macro    | Expands to                                              |
+| -------- | ------------------------------------------------------- |
+| `RR_LOG` | `ramrod::global_logger`                                 |
+| `RR_LOGD`| `global_logger.debug().file_info(__FILE__, __LINE__)`   |
+| `RR_LOGE`| `global_logger.error().file_info(__FILE__, __LINE__)`   |
+| `RR_LOGI`| `global_logger.info().file_info(__FILE__, __LINE__)`    |
+| `RR_LOGV`| `global_logger.verbose().file_info(__FILE__, __LINE__)` |
+| `RR_LOGW`| `global_logger.warning().file_info(__FILE__, __LINE__)` |
+| `RR_ENDL`| `ramrod::endl`                                          |
+
+### Single-level loggers
+
+For a single level, use `ramrod::Debug`, `ramrod::Error`, `ramrod::Info`, `ramrod::Verbose`, or `ramrod::Warning` with a `Writer` (or `WriterCerr` for Error). See the headers and tests for examples.
 
 ## Message format
 
 Each log line is:
 
 ```bash
-[<date>][<LEVEL>] <your message>\n
+# Without file_info(__FILE__, __LINE__)
+[<date>][<LEVEL>] <your message>
+# With file_info(__FILE__, __LINE__)
+[<date>][<LEVEL>][<filename(__FILE__)>][<__LINE__>] <your message>
 ```
 
-- **Date**: By default `[YYYY-MM-DD HH:MM:SS +zzzz]` (configurable via `change_date_format`).
+- **Date**: By default `[YYYY-MM-DD HH:MM:SS +zzzz]` (configurable via `date_format()`).
 - **LEVEL**: One of `[DEBUG]`, `[ERROR]`, `[INFO]`, `[VERBOSE]`, `[WARNING]`.
-- **Message**: Whatever you pass to `operator()` or `printf`; multiple arguments are concatenated in order.
-
-On a terminal, the level (and optionally the date) is colored; in a file, only plain text is written.
+- **File info**: if `file_info(__FILE__, __LINE__)` is used, then the filename and line are added, e.g. `[filename.cpp][648]`
+- **Message**: Whatever you stream or pass to `printf`; file output is plain text (no ANSI codes).
 
 ## API summary
 
-| Class / member                                                 | Description                                                              |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `ramrod::Logger`                                               | Holds `debug`, `error`, `info`, `verbose`, `warning` loggers.            |
-| `logger.debug` / `.error` / `.info` / `.verbose` / `.warning`  | Level-specific logger; call with `(args...)` or `.printf(format, ...)`.  |
-| `logger.change_log_output(path)`                               | Redirect all levels to a new file. Returns `true` on success.            |
-| `logger.change_date_format(format, buffer_size)`               | Set date format string and date buffer size.                             |
-| `logger.printf_buffer_size()` / `logger.printf_buffer_size(n)` | Get or set the printf buffer size (default 1024).                        |
-| `ramrod::Debug`, `Error`, `Info`, `Verbose`, `Warning`         | Standalone loggers for a single level; same `operator()`, `printf`, etc. |
-| `OutputFile::verify_status()`                                  | Call to ensure the file is open; recreates it if it was deleted while in use. |
+| Class / member                                                          | Description                                                                   |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ramrod::Logger`                                                        | Holds `debug()`, `error()`, `info()`, `verbose()`, `warning()` level loggers. |
+| `logger.debug()` / `.error()` / `.info()` / `.verbose()` / `.warning()` | Level logger; use `<<` or `.printf(format, ...)`.                             |
+| `Logger::OutputType`                                                    | `CONSOLE`, `FILE`, `FILE_AND_CONSOLE`.                                        |
+| `logger.output()`                                                       | Current output path (empty if console).                                       |
+| `logger.output(type, path)`                                             | Switch output. Returns `true` on success.                                     |
+| `logger.date_format()` / `logger.date_format(fmt, size)`                | Get or set date format and buffer size.                                       |
+| `logger.printf_buffer_size()` / `logger.printf_buffer_size(n)`          | Get or set printf buffer size (default 1024).                                 |
+| `logger.clear()`, `logger.end()`, `logger.flush()`                      | Clear output, end line, flush.                                                |
+| `ramrod::global_logger`, `RR_LOG`, `RR_LOGD`, …                         | Global logger and macros.                                                     |
 
 ## License
 
