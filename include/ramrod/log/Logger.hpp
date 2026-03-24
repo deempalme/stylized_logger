@@ -11,9 +11,12 @@
 #include "ramrod/log/Writer.hpp"
 
 #include <cstddef>
+#include <exception>
 #include <filesystem>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <type_traits>
 
 namespace ramrod
 {
@@ -196,6 +199,28 @@ public:
      *         True is returned if \p type is \p CONSOLE no matter what \p path is.
      */
     bool output(const OutputType type, const std::filesystem::path& path = TO_CONSOLE);
+
+    /**
+     * @brief Throw standard exception with message.
+     *
+     * @param condition  True to throw exception
+     * @param args       Message to show in exception
+     */
+    template <class E = std::invalid_argument, typename... T>
+    void throw_if(const bool condition, T&&... args)
+    {
+        static_assert(std::is_base_of<std::exception, E>::value,
+                      "throw_if can only accept std::exception based classes");
+
+        if (condition)
+        {
+            std::stringstream buffer{std::ios_base::out};
+            (buffer << ... << args);
+            const E exception{buffer.view().data()};
+            error() << exception << ramrod::endl;
+            throw exception;
+        }
+    }
 
 private:
     /**

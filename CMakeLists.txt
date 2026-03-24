@@ -78,12 +78,12 @@ if(NOT TARGET ${RamRodLog_LIBRARIES})
 
     set_target_properties(${PROJECT_NAME}
         PROPERTIES
-        CXX_STANDARD 17
+        CXX_STANDARD 20
         CXX_STANDARD_REQUIRED TRUE
         CXX_EXTENSIONS FALSE
     )
 
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
     if(BUILD_TESTING)
         add_subdirectory(tests)

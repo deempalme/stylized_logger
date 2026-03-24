@@ -18,7 +18,7 @@ static constexpr char ERROR_CODE_PREFIX[]{"Error code "};
 /// @brief String used to suffix the error code: ") "
 static constexpr char ERROR_CODE_SUFFIX[]{": "};
 /// @brief String used to prefix the file and line information: "["
-static constexpr char INFO_PREFIX[]{"\b["};
+static constexpr char INFO_PREFIX[]{"["};
 /// @brief String used to separate the file and line information: "]["
 static constexpr char INFO_SEPARATOR[]{"]["};
 /// @brief String used to suffix the file and line information: "]"
