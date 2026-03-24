@@ -222,6 +222,14 @@ Base& Base::operator<<(const std::error_code& message)
     return *this;
 }
 
+Base& Base::operator<<(const std::filesystem::path& message)
+{
+    _writer.format(_ansi_format);
+    _writer << message.c_str();
+    _writer.clear_format();
+    return *this;
+}
+
 Base& Base::operator<<(const Endl& endl)
 {
     _writer << endl;

@@ -5,6 +5,7 @@
 #include "ramrod/log/Writer.hpp"
 
 #include <exception>
+#include <filesystem>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -258,6 +259,15 @@ public:
      * @return Reference to current object.
      */
     Base& operator<<(const std::error_code& message);
+
+    /**
+     * @brief Write a filesystem path.
+     *
+     * @param message The filesystem path to write.
+     *
+     * @return Reference to current object.
+     */
+    Base& operator<<(const std::filesystem::path& message);
 
     /**
      * @brief Write a newline.
