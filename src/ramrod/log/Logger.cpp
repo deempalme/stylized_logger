@@ -17,19 +17,21 @@ Logger::Logger()
       error_{std::make_unique<Error>(*writer_cerr_)},
       info_{std::make_unique<Info>(*writer_)},
       verbose_{std::make_unique<Verbose>(*writer_)},
-      warning_{std::make_unique<Warning>(*writer_)}
+      warning_{std::make_unique<Warning>(*writer_)},
+      log_level_{LogLevel::VERBOSE}
 {
 }
 
 Logger::Logger(const OutputType type, const std::filesystem::path& path)
-    : writer_{std::make_unique<Writer>()},
-      writer_cerr_{std::make_unique<WriterCerr>()},
+    : writer_{},
+      writer_cerr_{},
       file_{},
       debug_{},
       error_{},
       info_{},
       verbose_{},
-      warning_{}
+      warning_{},
+      log_level_{LogLevel::VERBOSE}
 {
     output(type, path);
 }
@@ -89,6 +91,16 @@ void Logger::flush()
     writer_->flush();
 }
 
+void Logger::log_level(const LogLevel level)
+{
+    log_level_ = level;
+    debug_->log_level(level);
+    error_->log_level(level);
+    info_->log_level(level);
+    verbose_->log_level(level);
+    warning_->log_level(level);
+}
+
 size_t Logger::printf_buffer_size() const
 {
     return writer_->printf_buffer_size();
@@ -116,6 +128,8 @@ bool Logger::output(const OutputType type, const std::filesystem::path& path)
     info_.reset(new Info{*writer_});
     verbose_.reset(new Verbose{*writer_});
     warning_.reset(new Warning{*writer_});
+
+    log_level(log_level_);
 
     return success;
 }

@@ -2,6 +2,7 @@
 #define RAMROD_LOG_BASE_HPP
 
 #include "ramrod/log/Endl.hpp"
+#include "ramrod/log/Enumerators.hpp"
 #include "ramrod/log/Writer.hpp"
 
 #include <exception>
@@ -55,6 +56,15 @@ public:
      * @brief Set the header of the writer (ANSI format, date, and level tag).
      */
     Base& header();
+
+    /**
+     * @brief Set the log level.
+     *
+     * @param level The log level.
+     *
+     * @return Reference to current object.
+     */
+    Base& log_level(const LogLevel level = LogLevel::VERBOSE);
 
     /**
      * @brief Print a message to the writer with std::printf style format
@@ -284,8 +294,14 @@ protected:
     /// @brief Logging level tag message that is printed at the beginning of each line
     ///        after the date and time
     const char* _level_tag;
+    /// @brief Log level
+    LogLevel _log_level;
     /// @brief Object used to write messages
     Writer& _writer;
+
+private:
+    /// @brief Flag indicating if logging is enabled based on the logging level
+    bool logging_enabled_;
 };
 } // namespace ramrod
 

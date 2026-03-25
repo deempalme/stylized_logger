@@ -163,6 +163,13 @@ public:
     void flush();
 
     /**
+     * @brief Set the log level.
+     *
+     * @param level The log level.
+     */
+    void log_level(const LogLevel level);
+
+    /**
      * @brief Return the size of the buffer used for printf formatting.
      *
      * @return Current printf buffer size in bytes.
@@ -250,6 +257,9 @@ private:
     std::unique_ptr<Verbose> verbose_;
     /// @brief Warning-level logger.
     std::unique_ptr<Warning> warning_;
+
+    /// @brief Log level
+    LogLevel log_level_;
 };
 
 /// @brief Global logger instance for process-wide use.

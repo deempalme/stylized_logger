@@ -12,5 +12,6 @@ Warning::Warning(Writer& writer)
 {
     _ansi_format = WARNING_FORMAT;
     _level_tag = WARNING_TAG;
+    _log_level = LogLevel::WARNING;
 }
 } // namespace ramrod

@@ -12,5 +12,6 @@ Info::Info(Writer& writer)
 {
     _ansi_format = INFO_FORMAT;
     _level_tag = INFO_TAG;
+    _log_level = LogLevel::INFO;
 }
 } // namespace ramrod
