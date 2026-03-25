@@ -12,5 +12,6 @@ Error::Error(Writer& writer)
 {
     _ansi_format = ERROR_FORMAT;
     _level_tag = ERROR_TAG;
+    _log_level = LogLevel::ERROR;
 }
 } // namespace ramrod

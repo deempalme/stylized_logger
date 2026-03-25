@@ -12,5 +12,6 @@ Debug::Debug(Writer& writer)
 {
     _ansi_format = DEBUG_FORMAT;
     _level_tag = DEBUG_TAG;
+    _log_level = LogLevel::DEBUG;
 }
 } // namespace ramrod

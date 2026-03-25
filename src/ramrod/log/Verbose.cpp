@@ -12,5 +12,6 @@ Verbose::Verbose(Writer& writer)
 {
     _ansi_format = VERBOSE_FORMAT;
     _level_tag = VERBOSE_TAG;
+    _log_level = LogLevel::VERBOSE;
 }
 } // namespace ramrod
