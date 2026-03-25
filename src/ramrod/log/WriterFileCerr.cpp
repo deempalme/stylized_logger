@@ -32,7 +32,7 @@ void WriterFileCerr::end()
 
 WriterFileCerr& WriterFileCerr::file_info(const char* file, const int line)
 {
-    const std::filesystem::path filename{get_filename(file)};
+    const std::filesystem::path filename{Writer::get_filename(file)};
     file_ << INFO_PREFIX << filename.c_str() << INFO_SEPARATOR << line << INFO_SUFFIX;
     std::cerr << INFO_PREFIX << filename.c_str() << INFO_SEPARATOR << line << INFO_SUFFIX;
     return *this;

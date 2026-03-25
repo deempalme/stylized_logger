@@ -2,19 +2,26 @@
 
 #include "Constants.hpp"
 
+#include <chrono>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 
 namespace
 {
-/// @brief Size of the date buffer, string should contain "[2026-03-01 12:00:00 +0100]"
-///        (28 chars) plus null terminator; use 28 to allow for all timezone formats.
-static constexpr size_t DATE_DEFAULT_BUFFER_SIZE{28ul};
-/// @brief Format used to print the date and time, e.g. "[2026-03-01 12:00:00 +0100]"
-static constexpr char DATE_DEFAULT_FORMAT[]{"[%Y-%m-%d %H:%M:%S %z]"};
+/// @brief Size of the date buffer, string should contain "[2026-03-01 12:00:00.000001]"
+///        (32 chars) plus null terminator; use 32 to allow for all timezone formats.
+static constexpr std::size_t DATE_DEFAULT_BUFFER_SIZE{32ul};
+/// @brief Format used to print the date and time, e.g. "2026-03-01 12:00:00"
+static constexpr char DATE_DEFAULT_FORMAT[]{"%Y-%m-%d %H:%M:%S"};
+/// @brief Size of an empty buffer
+static constexpr std::size_t EMPTY_BUFFER_SIZE{};
+/// @brief Empty date string
+static constexpr char EMPTY_DATE[]{""};
+/// @brief Null terminator
+static constexpr char NULL_TERMINATOR{'\0'};
 /// @brief Size of the printf buffer
-static constexpr size_t PRINTF_BUFFER_DEFAULT_SIZE{1024ul};
+static constexpr std::size_t PRINTF_BUFFER_DEFAULT_SIZE{1024ul};
 } // Unnamed namespace
 
 namespace ramrod
@@ -48,10 +55,53 @@ void Writer::clear_format()
 
 const char* Writer::date()
 {
-    if (date_buffer_ == nullptr || date_buffer_size_ == 0)
-        return "";
-    const std::time_t t{std::time(nullptr)};
-    std::strftime(date_buffer_, date_buffer_size_, date_format_, std::localtime(&t));
+    if ((date_buffer_ == nullptr) || (date_buffer_size_ == EMPTY_BUFFER_SIZE) ||
+        (date_format_ == nullptr))
+        return EMPTY_DATE;
+    /// @brief String used to prefix the date: "["
+    static constexpr char DATE_PREFIX{'['};
+    /// @brief Size of a single character
+    static constexpr std::size_t CHARACTER_SIZE{1ul};
+    std::size_t offset{CHARACTER_SIZE};
+    *date_buffer_ = DATE_PREFIX;
+
+    const std::chrono::high_resolution_clock::time_point now{
+        std::chrono::high_resolution_clock::now()};
+    const std::time_t t{std::chrono::high_resolution_clock::to_time_t(now)};
+
+    std::tm local_time{};
+    offset += std::strftime(date_buffer_ + offset, date_buffer_size_, date_format_,
+                            ::localtime_r(&t, &local_time));
+    if (offset == CHARACTER_SIZE)
+        // Date's format is not supported by the system
+        return EMPTY_DATE;
+
+    /// @brief Index of the last character (where the null terminator will be placed)
+    const std::size_t last_character{date_buffer_size_ - CHARACTER_SIZE};
+
+    if (add_microseconds_)
+    {
+        const long microseconds_since_epoch{
+            std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count()};
+        static constexpr long MICROSECONDS_PER_SECOND{1'000'000};
+        const long microseconds{microseconds_since_epoch % MICROSECONDS_PER_SECOND};
+
+        offset = std::min(offset, last_character);
+        const int count{std::snprintf(date_buffer_ + offset, date_buffer_size_ - offset, ".%06ld",
+                                      microseconds)};
+        offset += static_cast<std::size_t>(count);
+    }
+
+    /// @brief Index of the character before the last
+    const std::size_t before_last_character{date_buffer_size_ - CHARACTER_SIZE - CHARACTER_SIZE};
+    offset = std::min(offset, before_last_character);
+    static constexpr char DATE_SUFFIX{']'};
+    *(date_buffer_ + offset) = DATE_SUFFIX;
+    ++offset;
+
+    offset = std::min(offset, last_character);
+    *(date_buffer_ + offset) = NULL_TERMINATOR;
+
     return date_buffer_;
 }
 
@@ -60,9 +110,10 @@ const char* Writer::date_format() const
     return date_format_;
 }
 
-bool Writer::date_format(const std::string& date_format, const size_t date_buffer_size)
+bool Writer::date_format(const std::string& date_format, const size_t date_buffer_size,
+                         const bool add_microseconds)
 {
-    if (date_format.empty() || (date_buffer_size == 0))
+    if (date_format.empty() || (date_buffer_size == EMPTY_BUFFER_SIZE))
         return false;
 
     if (date_format_ != nullptr)
@@ -73,7 +124,6 @@ bool Writer::date_format(const std::string& date_format, const size_t date_buffe
     std::strncpy(date_format_, date_format.c_str(), date_format.size());
 
     // Making sure the string is null-terminated
-    static constexpr char NULL_TERMINATOR{'\0'};
     date_format_[date_format.size()] = NULL_TERMINATOR;
 
     date_buffer_size_ = date_buffer_size;
@@ -81,7 +131,9 @@ bool Writer::date_format(const std::string& date_format, const size_t date_buffe
         delete[] date_buffer_;
     date_buffer_ = new char[date_buffer_size_];
 
-    return (date_format_ != nullptr) && (date_buffer_ != nullptr);
+    add_microseconds_ = add_microseconds;
+
+    return !std::string_view{date()}.empty();
 }
 
 void Writer::end()
@@ -91,7 +143,8 @@ void Writer::end()
 
 Writer& Writer::file_info(const char* file, const int line)
 {
-    std::cout << INFO_PREFIX << get_filename(file).c_str() << INFO_SEPARATOR << line << INFO_SUFFIX;
+    std::cout << INFO_PREFIX << Writer::get_filename(file).c_str() << INFO_SEPARATOR << line
+              << INFO_SUFFIX;
     return *this;
 }
 
@@ -232,7 +285,8 @@ Writer& Writer::operator<<(const void* message)
 
 Writer& Writer::operator<<(const std::error_code& message)
 {
-    std::cout << ERROR_CODE_PREFIX << message.value() << ERROR_CODE_SUFFIX << message.message().c_str();
+    std::cout << ERROR_CODE_PREFIX << message.value() << ERROR_CODE_SUFFIX
+              << message.message().c_str();
     return *this;
 }
 
