@@ -18,8 +18,8 @@ void WriterCerr::end()
 
 WriterCerr& WriterCerr::file_info(const char* file, const int line)
 {
-    const std::filesystem::path filename{get_filename(file)};
-    std::cerr << INFO_PREFIX << filename.c_str() << INFO_SEPARATOR << line << INFO_SUFFIX;
+    std::cerr << INFO_PREFIX << Writer::get_filename(file).c_str() << INFO_SEPARATOR << line
+              << INFO_SUFFIX;
     return *this;
 }
 
@@ -143,7 +143,8 @@ WriterCerr& WriterCerr::operator<<(const void* message)
 WriterCerr& WriterCerr::operator<<(const std::error_code& message)
 {
     // The full string should be: "(<error_code>) <error_message>"
-    std::cerr << ERROR_CODE_PREFIX << message.value() << ERROR_CODE_SUFFIX << message.message().c_str();
+    std::cerr << ERROR_CODE_PREFIX << message.value() << ERROR_CODE_SUFFIX
+              << message.message().c_str();
     return *this;
 }
 
