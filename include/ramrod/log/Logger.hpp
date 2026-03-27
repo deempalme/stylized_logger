@@ -141,16 +141,19 @@ public:
     /**
      * @brief Change the date format and the size of the date buffer.
      *
-     * @param date_format       The new date format, e.g. "[%Y-%m-%d %H:%M:%S %z]".
+     * @param date_format       The new date format, e.g. "%Y-%m-%d %H:%M:%S".
      * @param date_buffer_size  The new size of the date buffer, it must be able to contain
      *                          the longest date format, including the null terminator,
-     *                          e.g. 28 for "[2026-03-01 12:00:00 +0100]".
+     *                          both brackets \b [], and microseconds if \p add_microseconds is
+     *                          true. e.g. 32 for "[2026-03-01 12:00:00.000001]".
+     * @param add_microseconds  If true, microseconds will be added to the date format.
      *
      * @return True if the date format and buffer size were changed successfully.
      *         If \p date_format is empty or \p date_buffer_size is 0, false is returned.
      *         Also it will return false if the date format or buffer size cannot be allocated.
      */
-    bool date_format(const std::string& date_format, const size_t date_buffer_size);
+    bool date_format(const std::string& date_format, const size_t date_buffer_size,
+                     const bool add_microseconds = true);
 
     /**
      * @brief End the current line or flushes the output.

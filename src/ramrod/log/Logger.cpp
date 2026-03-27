@@ -76,9 +76,10 @@ const char* Logger::date_format() const
     return writer_->date_format();
 }
 
-bool Logger::date_format(const std::string& date_format, const size_t date_buffer_size)
+bool Logger::date_format(const std::string& date_format, const size_t date_buffer_size,
+                         const bool add_microseconds)
 {
-    return writer_->date_format(date_format, date_buffer_size);
+    return writer_->date_format(date_format, date_buffer_size, add_microseconds);
 }
 
 void Logger::end()
