@@ -6,7 +6,9 @@
 #include "ramrod/log/Endl.hpp"
 #include "ramrod/log/Writer.hpp"
 
+#include <cstddef>
 #include <string>
+#include <string_view>
 #include <system_error>
 
 #include <gtest/gtest.h>
@@ -34,8 +36,46 @@ TEST(WriterTest, DateFormatGetSet)
     ramrod::Writer writer;
     const char* default_fmt{writer.date_format()};
     ASSERT_NE(default_fmt, nullptr);
-    EXPECT_TRUE(writer.date_format("[%Y-%m-%d %H:%M:%S]", 24));
+    EXPECT_TRUE(writer.date_format("%Y-%m-%d %H:%M:%S", 32));
     EXPECT_NE(writer.date_format(), nullptr);
+}
+
+// Verifies default date_format enables microseconds: ".dddddd" before ']'.
+TEST(WriterTest, DateFormatDefaultAddsMicroseconds)
+{
+    ramrod::Writer writer;
+    const std::string_view d{writer.date()};
+    ASSERT_GE(d.size(), 8u);
+    const std::size_t dot{d.find_last_of('.')};
+    ASSERT_NE(dot, std::string_view::npos);
+    EXPECT_EQ(d.find_first_of(']', dot), dot + 7u);
+}
+
+// Verifies date_format(..., add_microseconds = false) omits fractional seconds.
+TEST(WriterTest, DateFormatAddMicrosecondsFalse)
+{
+    ramrod::Writer writer;
+    ASSERT_TRUE(writer.date_format("%Y-%m-%d %H:%M:%S", 24, false));
+    const std::string_view d{writer.date()};
+    ASSERT_FALSE(d.empty());
+    EXPECT_EQ(d.find('.'), std::string_view::npos);
+}
+
+// Verifies explicit add_microseconds true appends six digits after '.'.
+TEST(WriterTest, DateFormatAddMicrosecondsTrue)
+{
+    ramrod::Writer writer;
+    ASSERT_TRUE(writer.date_format("%Y-%m-%d %H:%M:%S", 32, true));
+    const std::string_view d{writer.date()};
+    const std::size_t dot{d.find_last_of('.')};
+    ASSERT_NE(dot, std::string_view::npos);
+    ASSERT_GE(d.size(), dot + 7u);
+    for (std::size_t i{dot + 1}; i < dot + 7; ++i)
+    {
+        EXPECT_GE(d[i], '0');
+        EXPECT_LE(d[i], '9');
+    }
+    EXPECT_EQ(d[dot + 7], ']');
 }
 
 // Verifies that date_format() returns false for empty format or zero buffer size.
