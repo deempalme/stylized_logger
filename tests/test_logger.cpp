@@ -172,8 +172,81 @@ TEST(LoggerTest, ChangeDateFormat)
 {
     fs::path path{(fs::temp_directory_path() / "ramrod_logger_datefmt.txt").lexically_normal()};
     ramrod::Logger log(ramrod::Logger::OutputType::FILE, path);
-    EXPECT_TRUE(log.date_format("[%Y-%m-%d %H:%M:%S]", 24));
+    EXPECT_TRUE(log.date_format("%Y-%m-%d %H:%M:%S", 32));
     log.info() << "after date format change";
+    fs::remove(path);
+}
+
+// Verifies date_format(..., add_microseconds = false) and that the file line has no fractional stamp.
+TEST(LoggerTest, DateFormatWithoutMicroseconds)
+{
+    fs::path path{(fs::temp_directory_path() / "ramrod_logger_datefmt_nous.txt").lexically_normal()};
+    if (fs::exists(path))
+        fs::remove(path);
+    {
+        ramrod::Logger log(ramrod::Logger::OutputType::FILE, path);
+        ASSERT_TRUE(log.date_format("%Y-%m-%d %H:%M:%S", 24, false));
+        log.info() << "no us";
+    }
+    std::ifstream f(path);
+    ASSERT_TRUE(f.is_open());
+    std::string content((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    f.close();
+    EXPECT_NE(content.find("no us"), std::string::npos);
+    const std::size_t bracket{content.find('[')};
+    ASSERT_NE(bracket, std::string::npos);
+    const std::size_t close{content.find(']', bracket)};
+    ASSERT_NE(close, std::string::npos);
+    EXPECT_EQ(std::string_view(content).substr(bracket, close - bracket + 1).find('.'),
+              std::string_view::npos);
+    fs::remove(path);
+}
+
+// Verifies log_level(WARNING) suppresses verbose, info, and debug but keeps warning and error.
+TEST(LoggerTest, LogLevelWarning)
+{
+    fs::path path{(fs::temp_directory_path() / "ramrod_logger_loglevel.txt").lexically_normal()};
+    if (fs::exists(path))
+        fs::remove(path);
+    {
+        ramrod::Logger log(ramrod::Logger::OutputType::FILE, path);
+        log.log_level(ramrod::LogLevel::WARNING);
+        log.verbose() << "TOKEN_V";
+        log.info() << "TOKEN_I";
+        log.debug() << "TOKEN_D";
+        log.warning() << "TOKEN_W";
+        log.error() << "TOKEN_E";
+    }
+    std::ifstream f(path);
+    ASSERT_TRUE(f.is_open());
+    std::string content((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    f.close();
+    EXPECT_EQ(content.find("TOKEN_V"), std::string::npos);
+    EXPECT_EQ(content.find("TOKEN_I"), std::string::npos);
+    EXPECT_EQ(content.find("TOKEN_D"), std::string::npos);
+    EXPECT_NE(content.find("TOKEN_W"), std::string::npos);
+    EXPECT_NE(content.find("TOKEN_E"), std::string::npos);
+    fs::remove(path);
+}
+
+// Verifies log_level(ERROR) leaves only error lines.
+TEST(LoggerTest, LogLevelError)
+{
+    fs::path path{(fs::temp_directory_path() / "ramrod_logger_loglevel_err.txt").lexically_normal()};
+    if (fs::exists(path))
+        fs::remove(path);
+    {
+        ramrod::Logger log(ramrod::Logger::OutputType::FILE, path);
+        log.log_level(ramrod::LogLevel::ERROR);
+        log.warning() << "TOKEN_W2";
+        log.error() << "TOKEN_E2";
+    }
+    std::ifstream f(path);
+    ASSERT_TRUE(f.is_open());
+    std::string content((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    f.close();
+    EXPECT_EQ(content.find("TOKEN_W2"), std::string::npos);
+    EXPECT_NE(content.find("TOKEN_E2"), std::string::npos);
     fs::remove(path);
 }
 

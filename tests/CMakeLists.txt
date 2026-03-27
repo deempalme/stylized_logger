@@ -41,7 +41,7 @@ target_include_directories(RamRodLogTests
 
 set_target_properties(RamRodLogTests
     PROPERTIES
-        CXX_STANDARD 17
+        CXX_STANDARD 20
         CXX_STANDARD_REQUIRED TRUE
         CXX_EXTENSIONS FALSE
 )
